@@ -22,7 +22,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
     initialData: []
   });
   
-  const { data: scripts } = useQuery({
+  const { data: scripts = [] } = useQuery<any[]>({
     queryKey: ['/api/scripts'],
     initialData: []
   });
@@ -89,15 +89,15 @@ export function Sidebar({ isOpen }: SidebarProps) {
                   {menuCategories.map((item) => (
                     <li key={item.path}>
                       <Link href={item.path}>
-                        <a className={cn(
-                          "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                        <div className={cn(
+                          "flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer",
                           item.isActive 
                             ? "bg-primary-light bg-opacity-10 text-primary-light" 
                             : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                         )}>
                           <i className={cn("ri-" + item.icon, "mr-3")}></i>
                           <span>{item.name}</span>
-                        </a>
+                        </div>
                       </Link>
                     </li>
                   ))}
@@ -116,13 +116,13 @@ export function Sidebar({ isOpen }: SidebarProps) {
                       No recent scripts
                     </li>
                   ) : (
-                    recentScripts.map((script) => (
+                    recentScripts.map((script: any) => (
                       <li key={script.id}>
                         <Link href={`/scripts/${script.id}`}>
-                          <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                          <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
                             <i className="ri-file-code-line mr-3 text-primary-light"></i>
                             <span>{script.name}</span>
-                          </a>
+                          </div>
                         </Link>
                       </li>
                     ))
@@ -139,28 +139,28 @@ export function Sidebar({ isOpen }: SidebarProps) {
                 <ul className="space-y-1">
                   <li>
                     <Link href="/settings">
-                      <a className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                      <div className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer",
                         location === '/settings'
                           ? "bg-primary-light bg-opacity-10 text-primary-light"
                           : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                       )}>
                         <i className="ri-gitlab-fill mr-3 text-orange-500"></i>
                         <span>GitLab Integration</span>
-                      </a>
+                      </div>
                     </Link>
                   </li>
                   <li>
                     <Link href="/preferences">
-                      <a className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                      <div className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer",
                         location === '/preferences'
                           ? "bg-primary-light bg-opacity-10 text-primary-light"
                           : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                       )}>
                         <i className="ri-settings-4-line mr-3"></i>
                         <span>Preferences</span>
-                      </a>
+                      </div>
                     </Link>
                   </li>
                 </ul>

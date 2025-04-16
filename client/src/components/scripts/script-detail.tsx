@@ -121,10 +121,10 @@ export function ScriptDetailView({ id }: ScriptDetailProps) {
       {/* Breadcrumb navigation */}
       <div className="flex items-center mb-4 text-sm">
         <Link href="/">
-          <a className="text-gray-500 dark:text-gray-400 hover:text-primary-light dark:hover:text-primary-light flex items-center">
+          <div className="text-gray-500 dark:text-gray-400 hover:text-primary-light dark:hover:text-primary-light flex items-center cursor-pointer">
             <ChevronLeft className="h-4 w-4 mr-1" />
             All Scripts
-          </a>
+          </div>
         </Link>
         <span className="mx-2 text-gray-400">/</span>
         <span className="text-gray-700 dark:text-gray-300">{script.name}</span>
