@@ -1,0 +1,37 @@
+Create a modern React web application called "ScriptHub" focused primarily on these two key areas:
+
+1. User Interface:
+   - Clean, modern design with a dark theme option for cybersecurity aesthetics
+   - Responsive layout that works well on both laptops and tablets
+   - Intuitive navigation with clear categorization of available scripts
+   - Animated transitions between pages and components for a polished feel
+   - Use Tailwind CSS for styling with a color scheme that incorporates dark blue, gray, and white colors
+
+2. Core Functionality:
+   - Homepage with a clean, grid-based list of available scripts
+   - Script detail page that allows users to:
+      * Download the script directly from GitLab (using my API key)
+      * Run the script directly from the web app
+      * Edit the YAML configuration file with a user-friendly interface
+      * View the README file for each script
+   - Backend integration that:
+      * Connects to GitLab API to fetch scripts, READMEs, and configuration files
+      * Allows running Python scripts directly from the web application
+      * Handles configuration file modification and application
+
+Technical Requirements:
+- Use React with TypeScript for frontend development
+- Implement a clean component structure that makes it easy to add new features later
+- Include a YAML editor component with syntax highlighting
+- Create a script execution engine that can run Python scripts with the modified configurations
+- Set up GitLab API integration to fetch and display repository content
+- Implement proper error handling and loading states
+- Create a simple backend service (Node.js) that can:
+  * Execute Python scripts securely
+  * Pass configuration parameters to the scripts
+  * Return script output to the frontend
+  * Handle GitLab API authentication (storing my API key securely)
+
+The application should be designed so I can simply plug in my project folder containing the Python scripts and YAML files, configure the GitLab API connection, and have everything work seamlessly.
+
+Focus on making the script running and configuration editing experience intuitive - the current workflow involves manually editing YAML files and running Python scripts from the command line.
