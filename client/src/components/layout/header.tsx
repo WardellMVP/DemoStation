@@ -9,45 +9,45 @@ interface HeaderProps {
 
 export function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
   return (
-    <header className="bg-[#0D1117] border-b border-[#1E2636] h-16 shadow-md">
-      <div className="flex items-center justify-between px-6 h-full">
+    <header className="bg-[#0A0E12] border-b border-[#1A2328] h-14 fixed top-0 left-0 right-0 z-40">
+      <div className="flex items-center justify-between px-5 h-full">
         {/* Logo and title */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           <Button 
             onClick={toggleSidebar} 
             variant="ghost" 
             size="icon" 
-            className="text-gray-400 hover:text-blue-400 md:hidden"
+            className="text-gray-500 hover:text-emerald-400 mr-1 md:hidden"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 w-4" />
             <span className="sr-only">Toggle menu</span>
           </Button>
           
-          <div className="flex items-center space-x-3">
-            <div className="bg-blue-600 text-white p-1.5 rounded">
-              <Terminal className="h-5 w-5" />
+          <div className="flex items-center space-x-2">
+            <div className="bg-emerald-800 text-emerald-100 p-1.5 rounded">
+              <Terminal className="h-4 w-4" />
             </div>
-            <h1 className="text-xl font-semibold text-white tracking-tight">
-              ScriptHub
+            <h1 className="text-lg font-semibold text-white tracking-tight">
+              Script<span className="text-emerald-400">Hub</span>
             </h1>
           </div>
         </div>
         
         {/* Search and actions */}
-        <div className="flex items-center space-x-5">
+        <div className="flex items-center space-x-4">
           <div className="relative hidden md:block">
             <Input
               type="text"
               placeholder="Search scripts..."
-              className="w-64 bg-[#1E2636] border-[#2D3748] text-gray-200 rounded-md pl-10 focus:border-blue-500 focus:ring-blue-500"
+              className="w-56 bg-[#131820] border-[#1A2328] text-gray-300 rounded pl-8 h-8 text-xs focus:border-emerald-700 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-            <Search className="h-4 w-4 absolute left-3 top-2.5 text-gray-400" />
+            <Search className="h-3.5 w-3.5 absolute left-2.5 top-2.5 text-gray-500" />
           </div>
           
           {/* User profile */}
           <div className="relative">
-            <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full bg-[#1E2636] hover:bg-[#2D3748] flex items-center justify-center text-gray-300">
-              <User className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="w-8 h-8 rounded bg-[#131820] hover:bg-[#1A2328] flex items-center justify-center text-gray-400">
+              <User className="h-4 w-4" />
             </Button>
           </div>
         </div>

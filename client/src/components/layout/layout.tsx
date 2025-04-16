@@ -12,17 +12,17 @@ export function Layout({ children }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0A101C] text-gray-100">
+    <div className="min-h-screen flex flex-col bg-[#0A0E12] text-gray-100">
       <Header isSidebarOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       
-      <div className="flex flex-1 overflow-hidden pt-16">
+      <div className="flex flex-1 overflow-hidden pt-14">
         <Sidebar isOpen={isSidebarOpen} />
         
         <AnimatePresence mode="wait">
           <motion.main 
             className={cn(
-              "flex-1 overflow-auto p-8 bg-[#0A101C]",
-              isSidebarOpen ? "md:ml-72" : ""
+              "flex-1 overflow-auto p-6 bg-[#0A0E12]",
+              isSidebarOpen ? "md:ml-64" : ""
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

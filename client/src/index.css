@@ -8,41 +8,55 @@
   }
 
   body {
-    @apply font-sans antialiased bg-[#0A101C] text-gray-100;
+    @apply font-sans antialiased bg-[#0A0E12] text-gray-100;
   }
 
   /* Custom scrollbar for dark theme */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-[#121720];
+    @apply bg-[#0F1419];
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-[#2D3748] rounded-full;
+    @apply bg-[#1A2A20] rounded;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-[#3A4556];
+    @apply bg-[#2A3E30];
   }
+}
+
+/* Custom variables for consistent colors */
+:root {
+  --color-darkest: #0A0E12;
+  --color-darker: #0F1419;
+  --color-dark: #131820;
+  --color-dark-accent: #1A2A20;
+  --color-accent: #10B981; /* Green accent color */
+  --color-accent-dim: rgba(16, 185, 129, 0.2);
+  --color-accent-glow: rgba(16, 185, 129, 0.5);
+  --color-border: #1A2328;
 }
 
 /* Custom cybersecurity-focused styles */
 .card-gradient {
-  background: linear-gradient(145deg, rgba(30, 38, 54, 0.6) 0%, rgba(17, 24, 39, 0.8) 100%);
+  background: linear-gradient(180deg, var(--color-dark) 0%, var(--color-darker) 100%);
 }
 
 .text-glow {
-  text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  text-shadow: 0 0 8px var(--color-accent-glow);
 }
 
 .cybr-btn {
-  @apply relative inline-flex items-center justify-center px-5 py-2 overflow-hidden font-medium text-blue-500 transition-all duration-300 bg-[#121720] border border-blue-500/30 rounded-md hover:text-white hover:border-blue-400 hover:bg-blue-600/20;
+  @apply relative inline-flex items-center justify-center px-5 py-2 overflow-hidden font-medium 
+  text-emerald-500 transition-all duration-300 bg-[#0F1419] border border-emerald-500/30 
+  rounded hover:text-white hover:border-emerald-400 hover:bg-emerald-600/20;
 }
 
 .code-font {
-  font-family: 'Fira Code', monospace;
+  font-family: 'Source Code Pro', 'Fira Code', monospace;
 }
