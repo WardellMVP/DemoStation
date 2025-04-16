@@ -1,18 +1,14 @@
 import { Script } from "@/lib/types";
-import { formatRelativeTime, getCategoryColor, getCategoryIcon, cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { formatRelativeTime, cn } from "@/lib/utils";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { Terminal, ArrowRight, Clock } from "lucide-react";
 
 interface ScriptCardProps {
   script: Script;
 }
 
 export function ScriptCard({ script }: ScriptCardProps) {
-  const categoryColor = getCategoryColor(script.category);
-  const categoryIcon = getCategoryIcon(script.category);
-  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -20,46 +16,30 @@ export function ScriptCard({ script }: ScriptCardProps) {
       transition={{ duration: 0.3 }}
     >
       <Link href={`/scripts/${script.id}`}>
-        <Card className="cursor-pointer bg-white dark:bg-dark-lighter rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-200">
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <div className={cn(
-                  "w-8 h-8 rounded-md flex items-center justify-center",
-                  `bg-${categoryColor}-100 dark:bg-${categoryColor}-900`
-                )}>
-                  <i className={cn(
-                    `ri-${categoryIcon}`,
-                    `text-${categoryColor}-600 dark:text-${categoryColor}-400`
-                  )}></i>
+        <div className="card-gradient cursor-pointer rounded-lg border border-[#1E2636] overflow-hidden hover:shadow-lg hover:border-blue-600/40 transition-all duration-200 h-full">
+          <div className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-md flex items-center justify-center bg-blue-600/20 text-blue-400">
+                  <Terminal className="h-5 w-5" />
                 </div>
-                <h3 className="font-medium text-gray-800 dark:text-white">{script.name}</h3>
+                <h3 className="font-medium text-white text-lg">{script.name}</h3>
               </div>
-              <Badge 
-                variant="outline" 
-                className={cn(
-                  `bg-${categoryColor}-100 dark:bg-${categoryColor}-900`,
-                  `text-${categoryColor}-800 dark:text-${categoryColor}-200`,
-                  "border-0"
-                )}
-              >
-                {script.category}
-              </Badge>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+            <p className="text-sm text-gray-400 mb-6 line-clamp-3 min-h-[4.5rem]">
               {script.description}
             </p>
             <div className="flex justify-between items-center">
-              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                <i className="ri-history-line mr-1"></i>
+              <div className="flex items-center text-xs text-gray-500">
+                <Clock className="h-3.5 w-3.5 mr-1.5" />
                 <span>Updated {formatRelativeTime(script.lastUpdated)}</span>
               </div>
-              <button className="text-primary-light hover:text-primary-dark dark:hover:text-primary-light">
-                <i className="ri-arrow-right-line"></i>
-              </button>
+              <div className="text-blue-400 hover:text-blue-300 transition-colors">
+                <ArrowRight className="h-5 w-5" />
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </Link>
     </motion.div>
   );

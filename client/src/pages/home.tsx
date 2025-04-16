@@ -3,115 +3,83 @@ import { useScripts } from "@/hooks/use-scripts";
 import { ScriptCard } from "@/components/scripts/script-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Filter, SortDesc } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
   const { scripts, isLoadingScripts } = useScripts();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Filter scripts based on category and search query
+  // Filter scripts based on search query only
   const filteredScripts = scripts.filter((script) => {
-    const matchesCategory = selectedCategory ? script.category === selectedCategory : true;
-    const matchesSearch = searchQuery
+    return searchQuery
       ? script.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
         script.description.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
-    
-    return matchesCategory && matchesSearch;
   });
   
-  // Get unique categories from scripts
-  const categories = Array.from(new Set(scripts.map((script) => script.category)));
-  
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <motion.div 
-        className="mb-6"
+        className="mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">Available Scripts</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Run, configure and download scripts directly from your GitLab repositories
+        <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">
+          <span className="text-blue-400 text-glow">Script</span>Hub
+        </h1>
+        <p className="text-gray-400 max-w-3xl">
+          Modern script management platform for security operations. Configure, execute and monitor your scripts with ease.
         </p>
       </motion.div>
       
-      {/* Filters and actions */}
+      {/* Search bar */}
       <motion.div 
-        className="flex flex-wrap items-center justify-between gap-4 mb-6"
+        className="mb-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
       >
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant={selectedCategory === null ? "default" : "outline"}
-            className="px-3 py-1.5 text-sm font-medium"
-            onClick={() => setSelectedCategory(null)}
-          >
-            All
-          </Button>
-          
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              className="px-3 py-1.5 text-sm font-medium"
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </Button>
-          ))}
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          <div className="relative md:hidden">
-            <Input
-              type="text"
-              placeholder="Search scripts..."
-              className="w-48 bg-gray-100 dark:bg-dark-lighter pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <i className="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
-          </div>
-          
-          <Button variant="ghost" size="sm" className="flex items-center text-gray-600 dark:text-gray-300">
-            <Filter className="h-4 w-4 mr-1" />
-            <span className="text-sm">Filter</span>
-          </Button>
-          
-          <Button variant="ghost" size="sm" className="flex items-center text-gray-600 dark:text-gray-300">
-            <SortDesc className="h-4 w-4 mr-1" />
-            <span className="text-sm">Sort</span>
-          </Button>
+        <div className="relative max-w-md">
+          <Input
+            type="text"
+            placeholder="Search scripts..."
+            className="w-full bg-[#121720] border-[#1E2636] text-gray-200 px-4 py-3 pl-11 h-auto rounded-lg focus-visible:ring-blue-500"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Search className="h-5 w-5 absolute left-4 top-3.5 text-gray-500" />
         </div>
       </motion.div>
       
       {/* Script grid */}
       {isLoadingScripts ? (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-light" />
+          <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
         </div>
       ) : filteredScripts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
           {filteredScripts.map((script) => (
             <ScriptCard key={script.id} script={script} />
           ))}
-        </div>
+        </motion.div>
       ) : (
-        <div className="text-center py-12">
-          <div className="text-gray-500 dark:text-gray-400 mb-2">No scripts found</div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-center py-16 card-gradient rounded-lg border border-[#1E2636]">
+          <div className="text-gray-300 mb-3 text-lg">No scripts found</div>
+          <p className="text-gray-400 max-w-md mx-auto">
             {searchQuery 
-              ? `No scripts match "${searchQuery}"` 
-              : selectedCategory 
-                ? `No scripts in the ${selectedCategory} category` 
-                : "Add scripts from GitLab to get started"}
+              ? `No scripts match "${searchQuery}"`  
+              : "Connect to GitLab to get started with your scripts"}
           </p>
+          <Button className="mt-6 cybr-btn">
+            Connect to GitLab
+          </Button>
         </div>
       )}
     </div>
