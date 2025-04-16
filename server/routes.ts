@@ -148,7 +148,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Return a sanitized version (no API key)
       const sanitizedConfig = { ...updatedConfig };
-      sanitizedConfig.apiKey = sanitizedConfig.apiKey.substring(0, 4) + '*'.repeat(sanitizedConfig.apiKey.length - 4);
+      if (sanitizedConfig.apiKey) {
+        sanitizedConfig.apiKey = sanitizedConfig.apiKey.substring(0, 4) + '*'.repeat(sanitizedConfig.apiKey.length - 4);
+      }
       
       res.status(200).json(sanitizedConfig);
     } catch (error) {
@@ -545,14 +547,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               
               // Handle parameters
-              if (configYaml.parameters && typeof configYaml.parameters === 'object') {
+              if (scenario && configYaml.parameters && typeof configYaml.parameters === 'object') {
                 // Get existing parameters for this scenario
                 const existingParams = await storage.getConfigParameters(scenario.id);
                 
                 // For each parameter in the config
-                for (const [paramName, paramData] of Object.entries(configYaml.parameters)) {
-                  if (typeof paramData === 'object') {
+                for (const [paramName, paramDataRaw] of Object.entries(configYaml.parameters)) {
+                  if (typeof paramDataRaw === 'object' && paramDataRaw !== null) {
                     const existingParam = existingParams.find(p => p.name === paramName);
+                    const paramData = paramDataRaw as Record<string, any>;
                     
                     // Create a parameter definition from the config
                     const paramType = detectParameterType(paramData);
@@ -561,8 +564,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const paramDefinition = {
                       scenarioId: scenario.id,
                       name: paramName,
-                      label: paramData.label || toTitleCase(paramName),
-                      description: paramData.description || '',
+                      label: (paramData.label as string) || toTitleCase(paramName),
+                      description: (paramData.description as string) || '',
                       type: paramType,
                       defaultValue: paramData.default !== undefined ? String(paramData.default) : '',
                       required: paramData.required === true,

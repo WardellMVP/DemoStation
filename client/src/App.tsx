@@ -7,13 +7,14 @@ import Home from "@/pages/home";
 import ScriptDetail from "@/pages/script-detail";
 import Settings from "@/pages/settings";
 import { Layout } from "@/components/layout/layout";
+import { ThemeProvider } from "@/context/theme-provider";
 
 function Router() {
   return (
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/scripts/:id" component={ScriptDetail} />
+        <Route path="/scenarios/:id" component={ScriptDetail} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
@@ -23,10 +24,12 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="dark">
+      <QueryClientProvider client={queryClient}>
+        <Router />
+        <Toaster />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

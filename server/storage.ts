@@ -151,7 +151,18 @@ export class MemStorage implements IStorage {
   
   async createScenario(insertScenario: InsertThreatScenario): Promise<ThreatScenario> {
     const id = this.currentScenarioId++;
-    const scenario: ThreatScenario = { ...insertScenario, id };
+    // Ensure all required fields have non-undefined values
+    const scenario: ThreatScenario = {
+      id,
+      name: insertScenario.name,
+      description: insertScenario.description || null,
+      folderPath: insertScenario.folderPath,
+      scriptPath: insertScenario.scriptPath,
+      configPath: insertScenario.configPath,
+      readmePath: insertScenario.readmePath || null,
+      lastUpdated: insertScenario.lastUpdated || null,
+      readmeContent: insertScenario.readmeContent || null
+    };
     this.scenarios.set(id, scenario);
     return scenario;
   }
@@ -178,7 +189,15 @@ export class MemStorage implements IStorage {
   
   async createScenarioExecution(insertExecution: InsertScenarioExecution): Promise<ScenarioExecution> {
     const id = this.currentExecutionId++;
-    const execution: ScenarioExecution = { ...insertExecution, id };
+    // Ensure all required fields have non-undefined values
+    const execution: ScenarioExecution = {
+      id,
+      scenarioId: insertExecution.scenarioId || null,
+      timestamp: insertExecution.timestamp,
+      status: insertExecution.status,
+      output: insertExecution.output || null,
+      configSnapshot: insertExecution.configSnapshot || {}
+    };
     this.executions.set(id, execution);
     return execution;
   }
@@ -200,7 +219,18 @@ export class MemStorage implements IStorage {
   
   async createConfigParameter(insertParameter: InsertConfigParameter): Promise<ConfigParameter> {
     const id = this.currentParameterId++;
-    const parameter: ConfigParameter = { ...insertParameter, id };
+    // Ensure all required fields have non-undefined values
+    const parameter: ConfigParameter = {
+      id,
+      name: insertParameter.name,
+      label: insertParameter.label,
+      type: insertParameter.type,
+      scenarioId: insertParameter.scenarioId || null,
+      description: insertParameter.description || null,
+      defaultValue: insertParameter.defaultValue || null,
+      required: insertParameter.required || null,
+      options: insertParameter.options || {}
+    };
     this.parameters.set(id, parameter);
     return parameter;
   }
