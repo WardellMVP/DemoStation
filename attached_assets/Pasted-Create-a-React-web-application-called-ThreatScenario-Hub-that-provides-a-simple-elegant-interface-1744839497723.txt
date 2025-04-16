@@ -1,0 +1,43 @@
+Create a React web application called "ThreatScenario Hub" that provides a simple, elegant interface for Sales Engineers to access and run Python-based security threat scenarios from our GitLab repository. The application needs these specific capabilities:
+
+1. GitLab Integration:
+   - Embed my GitLab API key (which I'll add later) to access a specific project repository
+   - Fetch the list of available scenarios from the "scenarios" folder in the repository
+   - Enable direct downloading of the entire project to the user's device with one click
+   - Parse README files to display documentation for each scenario
+
+2. User Interface:
+   - Clean, modern design with a dark theme suitable for security demonstrations
+   - Home page featuring:
+     * A prominent "Download Project" button at the top
+     * A grid of cards (one for each scenario found in the "scenarios" folder)
+     * Each card should display the scenario name and a brief description extracted from comments or README
+   - Each scenario card should include:
+     * Scenario name and description
+     * "View Details" option to expand and see more information
+     * "Run Scenario" button
+     * Configuration dropdown/expandable section
+
+3. Scenario Configuration:
+   - For each scenario, create a form interface that maps to its corresponding YAML configuration file
+   - Allow users to edit configuration parameters through a user-friendly form interface
+   - Include default values pre-populated from the original YAML
+   - Save button to apply configuration changes
+
+4. Execution Functionality:
+   - When "Run Scenario" is clicked, execute the main Python script with the appropriate flag/parameter to run that specific scenario
+   - Display execution output in a clean, terminal-like interface
+   - Show loading/progress indicators during execution
+   - Handle and display any errors or warnings appropriately
+
+5. Technical Structure:
+   - Create placeholder functions for GitLab API integration that I can later complete with my credentials
+   - Build a structure that lets me easily map the UI configuration fields to the specific YAML files
+   - Implement a backend proxy (Node.js) that can:
+     * Execute Python commands with proper flags and parameters
+     * Pass the modified YAML configurations to the Python script
+     * Stream command output back to the frontend
+
+The code should be well-commented and structured so that I can easily identify where to add my GitLab API key, adjust the specific paths to the Python script and scenarios folder, and modify how the configuration mapping works between the UI and the YAML files.
+
+Focus on creating a flexible solution where I can easily plug in the actual code execution commands, file paths, and configuration mapping after you've built the core application structure.

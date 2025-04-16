@@ -2,81 +2,101 @@ import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-c
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Users table for authentication
-export const users = pgTable("users", {
+// Global GitLab configuration
+export const gitlabConfig = pgTable("gitlab_config", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  gitlabToken: text("gitlab_token"),
+  apiKey: text("api_key"),
+  projectId: text("project_id"),
+  scenariosPath: text("scenarios_path").default("scenarios"),
+  baseUrl: text("base_url").default("https://gitlab.com"),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  gitlabToken: true,
-});
-
-// Scripts table to store script metadata
-export const scripts = pgTable("scripts", {
-  id: serial("id").primaryKey(), 
-  name: text("name").notNull(),
-  description: text("description"),
-  category: text("category").notNull(),
-  gitlabProjectId: text("gitlab_project_id"),
-  filePath: text("file_path"),
-  configPath: text("config_path"),
-  readmePath: text("readme_path"),
-  lastUpdated: text("last_updated"),
-  userId: integer("user_id").references(() => users.id),
-});
-
-export const insertScriptSchema = createInsertSchema(scripts).omit({
+export const insertGitlabConfigSchema = createInsertSchema(gitlabConfig).omit({
   id: true,
 });
 
-// Script executions to track history
-export const scriptExecutions = pgTable("script_executions", {
+// Threat scenarios table (replaces scripts)
+export const threatScenarios = pgTable("threat_scenarios", {
+  id: serial("id").primaryKey(), 
+  name: text("name").notNull(),
+  description: text("description"),
+  folderPath: text("folder_path").notNull(),
+  scriptPath: text("script_path").notNull(),
+  configPath: text("config_path").notNull(),
+  readmePath: text("readme_path"),
+  lastUpdated: text("last_updated"),
+  readmeContent: text("readme_content"),
+});
+
+export const insertThreatScenarioSchema = createInsertSchema(threatScenarios).omit({
+  id: true,
+});
+
+// Scenario executions to track history
+export const scenarioExecutions = pgTable("scenario_executions", {
   id: serial("id").primaryKey(),
-  scriptId: integer("script_id").references(() => scripts.id),
-  userId: integer("user_id").references(() => users.id),
+  scenarioId: integer("scenario_id").references(() => threatScenarios.id),
   timestamp: text("timestamp").notNull(),
   status: text("status").notNull(),
   output: text("output"),
   configSnapshot: jsonb("config_snapshot"),
 });
 
-export const insertScriptExecutionSchema = createInsertSchema(scriptExecutions).omit({
+export const insertScenarioExecutionSchema = createInsertSchema(scenarioExecutions).omit({
   id: true,
 });
 
-// Script categories
-export const scriptCategories = pgTable("script_categories", {
+// Configuration parameter schema
+export const configParameters = pgTable("config_parameters", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(),
-  icon: text("icon"),
-  color: text("color"),
+  scenarioId: integer("scenario_id").references(() => threatScenarios.id),
+  name: text("name").notNull(),
+  label: text("label").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // string, number, boolean, select
+  defaultValue: text("default_value"),
+  required: boolean("required").default(false),
+  options: jsonb("options"), // For select type parameters
 });
 
-export const insertScriptCategorySchema = createInsertSchema(scriptCategories).omit({
+export const insertConfigParameterSchema = createInsertSchema(configParameters).omit({
   id: true,
 });
 
 // Type definitions
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type GitlabConfig = typeof gitlabConfig.$inferSelect;
+export type InsertGitlabConfig = z.infer<typeof insertGitlabConfigSchema>;
 
-export type Script = typeof scripts.$inferSelect;
-export type InsertScript = z.infer<typeof insertScriptSchema>;
+export type ThreatScenario = typeof threatScenarios.$inferSelect;
+export type InsertThreatScenario = z.infer<typeof insertThreatScenarioSchema>;
 
-export type ScriptExecution = typeof scriptExecutions.$inferSelect;
-export type InsertScriptExecution = z.infer<typeof insertScriptExecutionSchema>;
+export type ScenarioExecution = typeof scenarioExecutions.$inferSelect;
+export type InsertScenarioExecution = z.infer<typeof insertScenarioExecutionSchema>;
 
-export type ScriptCategory = typeof scriptCategories.$inferSelect;
-export type InsertScriptCategory = z.infer<typeof insertScriptCategorySchema>;
+export type ConfigParameter = typeof configParameters.$inferSelect;
+export type InsertConfigParameter = z.infer<typeof insertConfigParameterSchema>;
 
-// Define API types
+// Define YAML Config Schema for parsing configuration files
 export const yamlConfigSchema = z.object({
-  content: z.string(),
+  name: z.string().optional(),
+  description: z.string().optional(),
+  version: z.string().optional(),
+  parameters: z.record(z.any()).optional(),
+});
+
+// Parameter type for form generation
+export const configParameterSchema = z.object({
+  name: z.string(),
+  label: z.string(),
+  type: z.enum(["string", "number", "boolean", "select"]),
+  defaultValue: z.any(),
+  description: z.string().optional(),
+  required: z.boolean().optional().default(false),
+  options: z.array(z.object({
+    label: z.string(),
+    value: z.any()
+  })).optional(),
 });
 
 export type YamlConfig = z.infer<typeof yamlConfigSchema>;
+export type ConfigParameterType = z.infer<typeof configParameterSchema>;
