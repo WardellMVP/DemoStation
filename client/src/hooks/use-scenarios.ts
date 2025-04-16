@@ -1,104 +1,111 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { ThreatScenario, ScenarioExecution, ConfigParameter } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { ThreatScenario, ScenarioExecution } from '@/lib/types';
+import { useToast } from './use-toast';
 
 export function useScenarios() {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   
   // Get all scenarios
-  const { data: scenarios = [], isLoading: isLoadingScenarios } = useQuery<ThreatScenario[]>({
-    queryKey: ['/api/scenarios'],
-  });
+  const getAllScenarios = () => {
+    return useQuery({
+      queryKey: ['/api/scenarios'],
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+  };
   
-  // Get a single scenario
+  // Get a single scenario by ID
   const getScenario = (id: number) => {
-    return useQuery<ThreatScenario>({
-      queryKey: [`/api/scenarios/${id}`],
+    return useQuery({
+      queryKey: ['/api/scenarios', id],
       enabled: !!id,
+      staleTime: 1000 * 60 * 5, // 5 minutes
     });
   };
   
-  // Get configuration parameters for a scenario
+  // Get scenario parameters
   const getScenarioParameters = (id: number) => {
-    return useQuery<ConfigParameter[]>({
-      queryKey: [`/api/scenarios/${id}/parameters`],
+    return useQuery({
+      queryKey: ['/api/scenarios', id, 'parameters'],
       enabled: !!id,
+      staleTime: 1000 * 60 * 5, // 5 minutes
     });
   };
   
-  // Get execution history for a scenario
+  // Get scenario executions
   const getScenarioExecutions = (id: number) => {
     return useQuery<ScenarioExecution[]>({
-      queryKey: [`/api/scenarios/${id}/executions`],
+      queryKey: ['/api/scenarios', id, 'executions'],
       enabled: !!id,
+      staleTime: 1000 * 30, // 30 seconds
+    });
+  };
+  
+  // Get execution details
+  const getExecutionDetails = (id: number) => {
+    return useQuery<ScenarioExecution>({
+      queryKey: ['/api/executions', id],
+      enabled: !!id && id > 0,
+      staleTime: 1000 * 30, // 30 seconds
     });
   };
   
   // Execute a scenario
   const executeScenario = useMutation({
-    mutationFn: async ({ id, config }: { id: number, config: any }) => {
-      const response = await apiRequest('POST', `/api/scenarios/${id}/execute`, { config });
-      return response.json();
-    },
-    onSuccess: (_, variables) => {
-      toast({
-        title: "Scenario execution started",
-        description: "The scenario is now running...",
+    mutationFn: async ({ id, config }: { id: number; config: any }) => {
+      return apiRequest(`/api/scenarios/${id}/execute`, {
+        method: 'POST',
+        body: JSON.stringify({ config }),
       });
-      // Refresh executions after a short delay
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: [`/api/scenarios/${variables.id}/executions`] });
-      }, 1000);
     },
-    onError: (error) => {
+    onSuccess: (data, variables) => {
       toast({
-        title: "Scenario execution failed",
-        description: error.message,
-        variant: "destructive",
+        title: 'Success',
+        description: 'Scenario execution has started',
+      });
+      // Invalidate the executions query to refetch the data
+      queryClient.invalidateQueries({ queryKey: ['/api/scenarios', variables.id, 'executions'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to execute scenario',
+        variant: 'destructive',
       });
     },
   });
   
-  // Get execution details
-  const getExecutionDetails = (id: number) => {
-    return useQuery<ScenarioExecution>({
-      queryKey: [`/api/executions/${id}`],
-      enabled: !!id,
-    });
-  };
-  
-  // Force reload scenarios from GitLab
+  // Reload scenarios from GitLab
   const reloadScenarios = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/reload-scenarios');
-      return response.json();
+      return apiRequest('/api/reload-scenarios', {
+        method: 'POST',
+      });
     },
     onSuccess: () => {
       toast({
-        title: "Scenarios reloaded",
-        description: "Threat scenarios have been reloaded from GitLab.",
+        title: 'Success',
+        description: 'Scenarios have been reloaded from GitLab',
       });
+      // Invalidate the scenarios query to refetch the data
       queryClient.invalidateQueries({ queryKey: ['/api/scenarios'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Failed to reload scenarios",
-        description: error.message,
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to reload scenarios',
+        variant: 'destructive',
       });
     },
   });
   
   return {
-    scenarios,
-    isLoadingScenarios,
+    getAllScenarios,
     getScenario,
     getScenarioParameters,
     getScenarioExecutions,
-    executeScenario,
     getExecutionDetails,
-    reloadScenarios
+    executeScenario,
+    reloadScenarios,
   };
 }
