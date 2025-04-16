@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel 
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { InfoIcon, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { FormEditorFieldType, FormEditorSection } from "@/lib/types";
-import { useForm } from "react-hook-form";
 import * as YAML from 'js-yaml';
 
 interface ScriptConfigFormProps {
@@ -28,10 +18,7 @@ interface ScriptConfigFormProps {
 
 export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: ScriptConfigFormProps) {
   const [formSections, setFormSections] = useState<FormEditorSection[]>([]);
-  
-  const form = useForm({
-    defaultValues: {}
-  });
+  const [formValues, setFormValues] = useState<Record<string, any>>({});
   
   // Parse YAML to form fields when yamlConfig changes
   useEffect(() => {
@@ -72,12 +59,6 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
               label: 'Timeout (seconds)',
               type: FormEditorFieldType.NUMBER,
               value: 2
-            },
-            {
-              name: 'max_retries',
-              label: 'Max Retries',
-              type: FormEditorFieldType.NUMBER,
-              value: 3
             }
           ]
         },
@@ -95,64 +76,6 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
               label: 'OS Detection',
               type: FormEditorFieldType.BOOLEAN,
               value: true
-            },
-            {
-              name: 'vulnerability_check',
-              label: 'Vulnerability Check',
-              type: FormEditorFieldType.BOOLEAN,
-              value: true
-            }
-          ]
-        },
-        {
-          title: 'Output Settings',
-          fields: [
-            {
-              name: 'output_format',
-              label: 'Output Format',
-              type: FormEditorFieldType.SELECT,
-              value: 'json',
-              options: [
-                { label: 'JSON', value: 'json' },
-                { label: 'CSV', value: 'csv' },
-                { label: 'Text', value: 'text' },
-                { label: 'HTML', value: 'html' }
-              ]
-            },
-            {
-              name: 'verbose',
-              label: 'Verbose Output',
-              type: FormEditorFieldType.BOOLEAN,
-              value: true
-            },
-            {
-              name: 'save_location',
-              label: 'Save Location',
-              type: FormEditorFieldType.TEXT,
-              value: '/reports/'
-            }
-          ]
-        },
-        {
-          title: 'Notifications',
-          fields: [
-            {
-              name: 'email_enabled',
-              label: 'Email Notifications',
-              type: FormEditorFieldType.BOOLEAN,
-              value: false
-            },
-            {
-              name: 'slack_enabled',
-              label: 'Slack Notifications',
-              type: FormEditorFieldType.BOOLEAN,
-              value: true
-            },
-            {
-              name: 'webhook_url',
-              label: 'Webhook URL',
-              type: FormEditorFieldType.TEXT,
-              value: 'https://hooks.slack.com/services/XXX/YYY/ZZZ'
             }
           ]
         }
@@ -161,64 +84,49 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
       setFormSections(sections);
       
       // Set default form values
-      const defaultValues: Record<string, any> = {};
+      const initialValues: Record<string, any> = {};
       sections.forEach(section => {
         section.fields.forEach(field => {
-          defaultValues[field.name] = field.value;
+          initialValues[field.name] = field.value;
         });
       });
       
-      form.reset(defaultValues);
+      setFormValues(initialValues);
     } catch (error) {
       console.error('Failed to parse YAML', error);
     }
-  }, [yamlConfig, form]);
+  }, [yamlConfig]);
   
-  // Update YAML when form values change
-  const onSubmit = (values: Record<string, any>) => {
-    try {
-      // In a real app, we would convert form values back to YAML
-      // For this demo, we'll just log the values
-      console.log('Form values:', values);
-      
-      // This is a simple example of converting form values to YAML
-      // In a real app, this would be more sophisticated to match the original structure
-      const yamlObj = {
-        scan_settings: {
-          target_network: values.target_network,
-          scan_speed: values.scan_speed,
-          port_range: values.port_range,
-          timeout_seconds: values.timeout_seconds,
-          max_retries: values.max_retries
-        },
-        detection: {
-          service_detection: values.service_detection,
-          os_detection: values.os_detection,
-          vulnerability_check: values.vulnerability_check
-        },
-        output: {
-          format: values.output_format,
-          verbose: values.verbose,
-          save_location: values.save_location,
-          include_timestamp: true
-        },
-        notifications: {
-          email: {
-            enabled: values.email_enabled,
-            recipients: ["admin@example.com"]
+  // Handle field value changes
+  const handleFieldChange = (name: string, value: any) => {
+    setFormValues(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Update YAML when values change (with timeout to avoid too many updates)
+    setTimeout(() => {
+      try {
+        // Convert form values to YAML
+        const yamlObj = {
+          scan_settings: {
+            target_network: formValues.target_network,
+            scan_speed: formValues.scan_speed,
+            port_range: formValues.port_range,
+            timeout_seconds: formValues.timeout_seconds
           },
-          slack: {
-            enabled: values.slack_enabled,
-            webhook_url: values.webhook_url
+          detection: {
+            service_detection: formValues.service_detection,
+            os_detection: formValues.os_detection
           }
-        }
-      };
-      
-      const newYamlConfig = YAML.dump(yamlObj);
-      onChange(newYamlConfig);
-    } catch (error) {
-      console.error('Failed to convert form values to YAML', error);
-    }
+        };
+        
+        const newYamlConfig = YAML.dump(yamlObj);
+        onChange(newYamlConfig);
+      } catch (error) {
+        console.error('Failed to convert form values to YAML', error);
+      }
+    }, 300);
   };
   
   return (
@@ -241,74 +149,77 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
             </div>
           ) : (
             <ScrollArea className="h-[500px] pr-4">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  {formSections.map((section, index) => (
-                    <div key={index}>
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        {section.title}
-                      </h4>
-                      <div className="space-y-4">
-                        {section.fields.map((field) => (
-                          <FormField
-                            key={field.name}
-                            control={form.control}
-                            name={field.name}
-                            render={({ field: formField }) => (
-                              <FormItem>
-                                {field.type === FormEditorFieldType.BOOLEAN ? (
-                                  <div className="flex items-center space-x-2">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={formField.value}
-                                        onCheckedChange={formField.onChange}
-                                      />
-                                    </FormControl>
-                                    <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                      {field.label}
-                                    </FormLabel>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                      {field.label}
-                                    </FormLabel>
-                                    <FormControl>
-                                      {field.type === FormEditorFieldType.SELECT ? (
-                                        <Select
-                                          onValueChange={formField.onChange}
-                                          defaultValue={formField.value}
-                                        >
-                                          <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select an option" />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {field.options?.map((option) => (
-                                              <SelectItem key={option.value} value={option.value}>
-                                                {option.label}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                      ) : (
-                                        <Input
-                                          {...formField}
-                                          type={field.type === FormEditorFieldType.NUMBER ? 'number' : 'text'}
-                                          className="w-full"
-                                        />
-                                      )}
-                                    </FormControl>
-                                  </>
-                                )}
-                              </FormItem>
-                            )}
-                          />
-                        ))}
-                      </div>
+              <div className="space-y-6">
+                {formSections.map((section, sectionIndex) => (
+                  <div key={sectionIndex}>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      {section.title}
+                    </h4>
+                    <div className="space-y-4">
+                      {section.fields.map((field) => (
+                        <div key={field.name} className="space-y-2">
+                          {field.type === FormEditorFieldType.BOOLEAN ? (
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id={field.name}
+                                checked={formValues[field.name] || false}
+                                onCheckedChange={(checked) => 
+                                  handleFieldChange(field.name, checked === true)
+                                }
+                              />
+                              <label 
+                                htmlFor={field.name}
+                                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                              >
+                                {field.label}
+                              </label>
+                            </div>
+                          ) : (
+                            <>
+                              <label 
+                                htmlFor={field.name}
+                                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                              >
+                                {field.label}
+                              </label>
+                              {field.type === FormEditorFieldType.SELECT ? (
+                                <Select
+                                  value={formValues[field.name] || ''}
+                                  onValueChange={(value) => handleFieldChange(field.name, value)}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select an option" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {field.options?.map((option) => (
+                                      <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Input
+                                  id={field.name}
+                                  type={field.type === FormEditorFieldType.NUMBER ? 'number' : 'text'}
+                                  value={formValues[field.name] || ''}
+                                  onChange={(e) => handleFieldChange(
+                                    field.name, 
+                                    field.type === FormEditorFieldType.NUMBER 
+                                      ? Number(e.target.value) 
+                                      : e.target.value
+                                  )}
+                                  className="w-full"
+                                />
+                              )}
+                            </>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </form>
-              </Form>
+                  </div>
+                ))}
+              </div>
             </ScrollArea>
           )}
         </CardContent>
