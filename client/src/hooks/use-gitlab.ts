@@ -1,60 +1,77 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { GitLabProject } from "@/lib/types";
+import { GitLabProject, GitlabConfig } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
 export function useGitLab() {
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  // Get GitLab projects
-  const { data: projects = [], isLoading: isLoadingProjects } = useQuery<GitLabProject[]>({
-    queryKey: ['/api/gitlab/projects'],
+  // Get GitLab configuration
+  const { data: config, isLoading: isLoadingConfig } = useQuery<GitlabConfig>({
+    queryKey: ['/api/gitlab/config'],
     retry: 1,
-    onError: (error) => {
-      toast({
-        title: "Failed to fetch GitLab projects",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    gcTime: 0,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    throwOnError: false,
+  });
+  
+  // Get GitLab project info
+  const { data: projectInfo, isLoading: isLoadingProjectInfo } = useQuery<GitLabProject>({
+    queryKey: ['/api/gitlab/project-info'],
+    retry: 1,
+    enabled: !!config?.projectId,
+    gcTime: 0,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    throwOnError: false,
   });
   
   // Get file content
-  const getFileContent = (projectId: string, filePath: string, ref: string = 'main') => {
+  const getFileContent = (filePath: string, ref: string = 'main') => {
     return useQuery<{ content: string }>({
-      queryKey: [`/api/gitlab/files?projectId=${projectId}&path=${filePath}&ref=${ref}`],
-      enabled: !!projectId && !!filePath,
+      queryKey: [`/api/gitlab/file?path=${encodeURIComponent(filePath)}&ref=${ref}`],
+      enabled: !!filePath && !!(config && config.projectId),
       retry: 1,
-      onError: (error) => {
-        toast({
-          title: "Failed to fetch file content",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      gcTime: 0,
+      throwOnError: false,
     });
   };
   
-  // Download file
-  const downloadFile = (projectId: string, filePath: string, ref: string = 'main') => {
-    window.open(`/api/scripts/download?projectId=${projectId}&filePath=${filePath}&ref=${ref}`, '_blank');
+  // Download project archive
+  const downloadProject = (ref: string = 'main') => {
+    if (!(config && config.projectId)) {
+      toast({
+        title: "GitLab not configured",
+        description: "Configure GitLab integration first",
+        variant: "destructive"
+      });
+      return;
+    }
+    window.open(`/api/gitlab/download-project?ref=${ref}`, '_blank');
   };
   
-  // Update API token
-  const updateToken = useMutation({
-    mutationFn: async (token: string) => {
-      const response = await apiRequest('POST', '/api/settings/gitlab-token', { token });
+  // Update GitLab configuration
+  const updateGitlabConfig = useMutation({
+    mutationFn: async (gitlabConfig: {
+      apiKey: string;
+      projectId: string;
+      scenariosPath?: string;
+      baseUrl?: string;
+    }) => {
+      const response = await apiRequest('POST', '/api/gitlab/config', gitlabConfig);
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "GitLab token updated",
-        description: "Your GitLab API token has been updated successfully",
+        title: "GitLab configuration updated",
+        description: "GitLab integration has been configured successfully. Scenarios will be loaded in the background.",
       });
+      queryClient.invalidateQueries({ queryKey: ['/api/gitlab/config'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/scenarios'] });
     },
     onError: (error) => {
       toast({
-        title: "Failed to update GitLab token",
+        title: "Failed to update GitLab configuration",
         description: error.message,
         variant: "destructive",
       });
@@ -62,10 +79,13 @@ export function useGitLab() {
   });
   
   return {
-    projects,
-    isLoadingProjects,
+    config,
+    isLoadingConfig,
+    projectInfo,
+    isLoadingProjectInfo,
     getFileContent,
-    downloadFile,
-    updateToken,
+    downloadProject,
+    updateGitlabConfig,
+    isConfigured: !!(config && config.apiKey && config.projectId)
   };
 }

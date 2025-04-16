@@ -16,9 +16,9 @@ import { InfoIcon, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { FormEditorField, FormEditorSection } from "@/lib/types";
+import { FormEditorFieldType, FormEditorSection } from "@/lib/types";
 import { useForm } from "react-hook-form";
-import YAML from 'js-yaml';
+import * as YAML from 'js-yaml';
 
 interface ScriptConfigFormProps {
   yamlConfig: string;
@@ -47,13 +47,13 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
             {
               name: 'target_network',
               label: 'Target Network',
-              type: FormEditorField.TEXT,
+              type: FormEditorFieldType.TEXT,
               value: '192.168.1.0/24'
             },
             {
               name: 'scan_speed',
               label: 'Scan Speed',
-              type: FormEditorField.SELECT,
+              type: FormEditorFieldType.SELECT,
               value: 'normal',
               options: [
                 { label: 'Slow', value: 'slow' },
@@ -64,19 +64,19 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
             {
               name: 'port_range',
               label: 'Port Range',
-              type: FormEditorField.TEXT,
+              type: FormEditorFieldType.TEXT,
               value: '1-1024'
             },
             {
               name: 'timeout_seconds',
               label: 'Timeout (seconds)',
-              type: FormEditorField.NUMBER,
+              type: FormEditorFieldType.NUMBER,
               value: 2
             },
             {
               name: 'max_retries',
               label: 'Max Retries',
-              type: FormEditorField.NUMBER,
+              type: FormEditorFieldType.NUMBER,
               value: 3
             }
           ]
@@ -87,19 +87,19 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
             {
               name: 'service_detection',
               label: 'Service Detection',
-              type: FormEditorField.BOOLEAN,
+              type: FormEditorFieldType.BOOLEAN,
               value: true
             },
             {
               name: 'os_detection',
               label: 'OS Detection',
-              type: FormEditorField.BOOLEAN,
+              type: FormEditorFieldType.BOOLEAN,
               value: true
             },
             {
               name: 'vulnerability_check',
               label: 'Vulnerability Check',
-              type: FormEditorField.BOOLEAN,
+              type: FormEditorFieldType.BOOLEAN,
               value: true
             }
           ]
@@ -110,7 +110,7 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
             {
               name: 'output_format',
               label: 'Output Format',
-              type: FormEditorField.SELECT,
+              type: FormEditorFieldType.SELECT,
               value: 'json',
               options: [
                 { label: 'JSON', value: 'json' },
@@ -122,13 +122,13 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
             {
               name: 'verbose',
               label: 'Verbose Output',
-              type: FormEditorField.BOOLEAN,
+              type: FormEditorFieldType.BOOLEAN,
               value: true
             },
             {
               name: 'save_location',
               label: 'Save Location',
-              type: FormEditorField.TEXT,
+              type: FormEditorFieldType.TEXT,
               value: '/reports/'
             }
           ]
@@ -139,19 +139,19 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
             {
               name: 'email_enabled',
               label: 'Email Notifications',
-              type: FormEditorField.BOOLEAN,
+              type: FormEditorFieldType.BOOLEAN,
               value: false
             },
             {
               name: 'slack_enabled',
               label: 'Slack Notifications',
-              type: FormEditorField.BOOLEAN,
+              type: FormEditorFieldType.BOOLEAN,
               value: true
             },
             {
               name: 'webhook_url',
               label: 'Webhook URL',
-              type: FormEditorField.TEXT,
+              type: FormEditorFieldType.TEXT,
               value: 'https://hooks.slack.com/services/XXX/YYY/ZZZ'
             }
           ]
@@ -256,7 +256,7 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
                             name={field.name}
                             render={({ field: formField }) => (
                               <FormItem>
-                                {field.type === FormEditorField.BOOLEAN ? (
+                                {field.type === FormEditorFieldType.BOOLEAN ? (
                                   <div className="flex items-center space-x-2">
                                     <FormControl>
                                       <Checkbox
@@ -274,7 +274,7 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
                                       {field.label}
                                     </FormLabel>
                                     <FormControl>
-                                      {field.type === FormEditorField.SELECT ? (
+                                      {field.type === FormEditorFieldType.SELECT ? (
                                         <Select
                                           onValueChange={formField.onChange}
                                           defaultValue={formField.value}
@@ -293,7 +293,7 @@ export function ScriptConfigForm({ yamlConfig, onChange, isLoading = false }: Sc
                                       ) : (
                                         <Input
                                           {...formField}
-                                          type={field.type === FormEditorField.NUMBER ? 'number' : 'text'}
+                                          type={field.type === FormEditorFieldType.NUMBER ? 'number' : 'text'}
                                           className="w-full"
                                         />
                                       )}

@@ -2,7 +2,16 @@ import { cn } from "@/lib/utils";
 import { useLocation, Link } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { FileCode, GitMerge, Terminal } from "lucide-react";
+import { 
+  Shield, 
+  ShieldAlert, 
+  GitMerge, 
+  Database, 
+  History, 
+  Settings,
+  Lock
+} from "lucide-react";
+import { ThreatScenario } from "@/lib/types";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,13 +20,13 @@ interface SidebarProps {
 export function Sidebar({ isOpen }: SidebarProps) {
   const [location] = useLocation();
   
-  const { data: scripts = [] } = useQuery<any[]>({
-    queryKey: ['/api/scripts'],
+  const { data: scenarios = [] } = useQuery<ThreatScenario[]>({
+    queryKey: ['/api/scenarios'],
     initialData: []
   });
   
-  // Get recent scripts - would be replaced with actual data in a real app
-  const recentScripts = scripts.slice(0, 3);
+  // Get recent scenarios
+  const recentScenarios = scenarios.slice(0, 3);
 
   return (
     <AnimatePresence>
@@ -45,8 +54,21 @@ export function Sidebar({ isOpen }: SidebarProps) {
                           ? "bg-emerald-900/30 text-emerald-400"
                           : "text-gray-300 hover:bg-[#131820] hover:text-emerald-300"
                       )}>
-                        <Terminal className="h-4 w-4 mr-3" />
-                        <span>All Scripts</span>
+                        <Shield className="h-4 w-4 mr-3" />
+                        <span>Threat Scenarios</span>
+                      </div>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/history">
+                      <div className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium rounded cursor-pointer",
+                        location === '/history'
+                          ? "bg-emerald-900/30 text-emerald-400"
+                          : "text-gray-300 hover:bg-[#131820] hover:text-emerald-300"
+                      )}>
+                        <History className="h-4 w-4 mr-3" />
+                        <span>Execution History</span>
                       </div>
                     </Link>
                   </li>
@@ -56,21 +78,21 @@ export function Sidebar({ isOpen }: SidebarProps) {
             
             <div className="mb-7">
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                Recent Scripts
+                Recent Scenarios
               </h2>
               <nav>
                 <ul className="space-y-1">
-                  {recentScripts.length === 0 ? (
+                  {recentScenarios.length === 0 ? (
                     <li className="px-3 py-2 text-sm text-gray-600">
-                      No recent scripts
+                      No recent scenarios
                     </li>
                   ) : (
-                    recentScripts.map((script: any) => (
-                      <li key={script.id}>
-                        <Link href={`/scripts/${script.id}`}>
+                    recentScenarios.map((scenario) => (
+                      <li key={scenario.id}>
+                        <Link href={`/scenarios/${scenario.id}`}>
                           <div className="flex items-center px-3 py-2 text-sm font-medium rounded text-gray-400 hover:bg-[#131820] hover:text-gray-200 cursor-pointer">
-                            <FileCode className="h-4 w-4 mr-3 text-emerald-500" />
-                            <span>{script.name}</span>
+                            <ShieldAlert className="h-4 w-4 mr-3 text-emerald-500" />
+                            <span>{scenario.name}</span>
                           </div>
                         </Link>
                       </li>
@@ -82,7 +104,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
             
             <div>
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                Settings
+                Configuration
               </h2>
               <nav>
                 <ul className="space-y-1">

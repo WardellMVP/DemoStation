@@ -1,31 +1,42 @@
-export interface Script {
+export interface GitlabConfig {
+  id: number;
+  apiKey: string | null;
+  projectId: string | null;
+  scenariosPath: string | null;
+  baseUrl: string | null;
+}
+
+export interface ThreatScenario {
   id: number;
   name: string;
-  description: string;
-  category: string;
-  gitlabProjectId: string;
-  filePath: string;
+  description: string | null;
+  folderPath: string;
+  scriptPath: string;
   configPath: string;
-  readmePath: string;
-  lastUpdated: string;
-  userId: number;
+  readmePath: string | null;
+  lastUpdated: string | null;
+  readmeContent: string | null;
 }
 
-export interface ScriptCategory {
+export interface ScenarioExecution {
   id: number;
-  name: string;
-  icon: string;
-  color: string;
-}
-
-export interface ScriptExecution {
-  id: number;
-  scriptId: number;
-  userId: number;
+  scenarioId: number | null;
   timestamp: string;
   status: 'running' | 'completed' | 'failed';
-  output?: string;
-  configSnapshot?: any;
+  output: string | null;
+  configSnapshot: any;
+}
+
+export interface ConfigParameter {
+  id: number;
+  scenarioId: number | null;
+  name: string;
+  label: string;
+  description: string | null;
+  type: string;
+  defaultValue: string | null;
+  required: boolean | null;
+  options: any;
 }
 
 export interface GitLabProject {
@@ -61,7 +72,7 @@ export interface YamlEditorState {
   error?: string;
 }
 
-export enum FormEditorField {
+export enum FormEditorFieldType {
   TEXT = 'text',
   NUMBER = 'number',
   BOOLEAN = 'boolean',
@@ -76,7 +87,7 @@ export interface FormEditorOption {
 export interface FormEditorField {
   name: string;
   label: string;
-  type: FormEditorField;
+  type: FormEditorFieldType;
   value: any;
   options?: FormEditorOption[];
 }
