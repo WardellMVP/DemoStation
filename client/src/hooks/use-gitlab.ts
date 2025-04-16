@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { GitlabConfig, GitLabProject } from '@/lib/types';
@@ -12,7 +11,7 @@ export function useGitLab() {
     data: config,
     isLoading: isLoadingConfig,
     error: configError
-  } = useQuery({
+  } = useQuery<GitlabConfig>({
     queryKey: ['/api/gitlab/config'],
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -21,7 +20,7 @@ export function useGitLab() {
   const {
     data: projectInfo,
     isLoading: isLoadingProjectInfo
-  } = useQuery({
+  } = useQuery<GitLabProject>({
     queryKey: ['/api/gitlab/project-info'],
     staleTime: 1000 * 60 * 5, // 5 minutes
     enabled: !!config && !!config.apiKey && !!config.projectId,
@@ -60,7 +59,7 @@ export function useGitLab() {
         method: 'GET',
       });
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: 'Success',
         description: 'Project files have been downloaded',
