@@ -1,7 +1,6 @@
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Menu } from "lucide-react";
+import { Menu, Terminal, Search, User } from "lucide-react";
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -10,47 +9,45 @@ interface HeaderProps {
 
 export function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
   return (
-    <header className="bg-white dark:bg-dark-lighter border-b border-gray-200 dark:border-gray-700 shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3">
+    <header className="bg-[#0D1117] border-b border-[#1E2636] h-16 shadow-md">
+      <div className="flex items-center justify-between px-6 h-full">
         {/* Logo and title */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
           <Button 
             onClick={toggleSidebar} 
             variant="ghost" 
             size="icon" 
-            className="text-gray-500 dark:text-gray-400 hover:text-primary-light dark:hover:text-primary-light md:hidden"
+            className="text-gray-400 hover:text-blue-400 md:hidden"
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle menu</span>
           </Button>
           
-          <div className="flex items-center space-x-2">
-            <div className="bg-primary text-white p-1 rounded">
-              <i className="ri-code-s-slash-line text-xl"></i>
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-600 text-white p-1.5 rounded">
+              <Terminal className="h-5 w-5" />
             </div>
-            <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
-              DemoStation
+            <h1 className="text-xl font-semibold text-white tracking-tight">
+              ScriptHub
             </h1>
           </div>
         </div>
         
         {/* Search and actions */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-5">
           <div className="relative hidden md:block">
             <Input
               type="text"
               placeholder="Search scripts..."
-              className="w-64 bg-gray-100 dark:bg-dark text-gray-800 dark:text-gray-200 rounded-lg pl-10"
+              className="w-64 bg-[#1E2636] border-[#2D3748] text-gray-200 rounded-md pl-10 focus:border-blue-500 focus:ring-blue-500"
             />
-            <i className="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
+            <Search className="h-4 w-4 absolute left-3 top-2.5 text-gray-400" />
           </div>
-          
-          <ThemeToggle />
           
           {/* User profile */}
           <div className="relative">
-            <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300">
-              <i className="ri-user-line"></i>
+            <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full bg-[#1E2636] hover:bg-[#2D3748] flex items-center justify-center text-gray-300">
+              <User className="h-5 w-5" />
             </Button>
           </div>
         </div>
