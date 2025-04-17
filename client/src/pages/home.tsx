@@ -27,10 +27,10 @@ export default function Home() {
         transition={{ duration: 0.3 }}
       >
         <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
-          Script<span className="text-emerald-400">Hub</span>
+          Demo<span className="text-emerald-400">Codex</span>
         </h1>
         <p className="text-gray-400 text-sm max-w-2xl">
-          Security script management platform. Configure, execute and monitor your scripts with ease.
+          Security scenario management platform. Configure, execute and monitor your threat scenarios with ease.
         </p>
       </motion.div>
       
@@ -44,7 +44,7 @@ export default function Home() {
         <div className="relative max-w-sm">
           <Input
             type="text"
-            placeholder="Search scripts..."
+            placeholder="Search scenarios..."
             className="w-full bg-[#0F1419] border-[#1A2328] text-gray-300 pl-9 h-9 rounded focus-visible:ring-emerald-700"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -71,11 +71,11 @@ export default function Home() {
         </motion.div>
       ) : (
         <div className="text-center py-12 bg-[#0F1419] rounded border border-[#1A2328]">
-          <div className="text-gray-300 mb-3 text-base">No scripts found</div>
+          <div className="text-gray-300 mb-3 text-base">No scenarios found</div>
           <p className="text-sm text-gray-500 max-w-md mx-auto">
             {searchQuery 
-              ? `No scripts match "${searchQuery}"`  
-              : "Connect to GitLab to get started with your scripts"}
+              ? `No scenarios match "${searchQuery}"`  
+              : "Connect to GitLab to get started with your security scenarios"}
           </p>
           <Button className="mt-5 bg-[#1A2A20] text-emerald-400 hover:bg-[#1A2A20]/80 border-0">
             <GitMerge className="h-4 w-4 mr-2" />

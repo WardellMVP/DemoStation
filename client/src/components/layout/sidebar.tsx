@@ -55,7 +55,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
                           : "text-gray-300 hover:bg-[#131820] hover:text-emerald-300"
                       )}>
                         <Shield className="h-4 w-4 mr-3" />
-                        <span>Threat Scenarios</span>
+                        <span>Scenarios</span>
                       </div>
                     </Link>
                   </li>
