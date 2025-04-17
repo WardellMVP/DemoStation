@@ -48,8 +48,8 @@ export function GitLabConfig() {
   };
   
   return (
-    <div className="rounded-lg overflow-hidden border border-[#1A2328] bg-[#0F1419]">
-      <div className="border-b border-[#1A2328] p-4">
+    <div className="rounded-[4px] overflow-hidden border border-[#2a2a2a] bg-[#111]">
+      <div className="border-b border-[#2a2a2a] p-4">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="text-base font-medium text-white">GitLab Integration</h3>
         </div>
@@ -61,7 +61,7 @@ export function GitLabConfig() {
       <div className="p-5">
         {isLoadingConfig ? (
           <div className="flex items-center justify-center h-32">
-            <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-[hsl(135,80%,45%)]" />
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -76,7 +76,7 @@ export function GitLabConfig() {
                 value={formValues.apiKey}
                 onChange={handleChange}
                 placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
-                className="bg-[#131820] border-[#1A2328] text-gray-300 h-9 text-sm focus-visible:ring-emerald-700"
+                className="bg-[#191919] border-[#2a2a2a] text-gray-300 h-9 text-sm focus-visible:ring-[hsl(135,80%,40%)]"
                 required
               />
               <p className="text-xs text-gray-500">
@@ -94,7 +94,7 @@ export function GitLabConfig() {
                 value={formValues.baseUrl}
                 onChange={handleChange}
                 placeholder="https://gitlab.com"
-                className="bg-[#131820] border-[#1A2328] text-gray-300 h-9 text-sm focus-visible:ring-emerald-700"
+                className="bg-[#191919] border-[#2a2a2a] text-gray-300 h-9 text-sm focus-visible:ring-[hsl(135,80%,40%)]"
               />
               <p className="text-xs text-gray-500">
                 Leave as default for gitlab.com or specify your self-hosted instance
@@ -111,7 +111,7 @@ export function GitLabConfig() {
                 value={formValues.projectId}
                 onChange={handleChange}
                 placeholder="12345678"
-                className="bg-[#131820] border-[#1A2328] text-gray-300 h-9 text-sm focus-visible:ring-emerald-700"
+                className="bg-[#191919] border-[#2a2a2a] text-gray-300 h-9 text-sm focus-visible:ring-[hsl(135,80%,40%)]"
                 required
               />
               <p className="text-xs text-gray-500">
@@ -129,7 +129,7 @@ export function GitLabConfig() {
                 value={formValues.scenariosPath}
                 onChange={handleChange}
                 placeholder="threat-scenarios"
-                className="bg-[#131820] border-[#1A2328] text-gray-300 h-9 text-sm focus-visible:ring-emerald-700"
+                className="bg-[#191919] border-[#2a2a2a] text-gray-300 h-9 text-sm focus-visible:ring-[hsl(135,80%,40%)]"
               />
               <p className="text-xs text-gray-500">
                 Directory in the repository where scenarios are stored
@@ -137,8 +137,8 @@ export function GitLabConfig() {
             </div>
             
             {projectInfo && (
-              <div className="mt-4 p-4 bg-[#1A2A20] border border-[#1A3A25] text-emerald-300 rounded">
-                <h4 className="font-medium text-emerald-400">Connected to GitLab</h4>
+              <div className="mt-4 p-4 bg-[rgba(60,180,80,0.1)] border border-[rgba(60,180,80,0.2)] text-[hsl(135,80%,70%)] rounded-[4px]">
+                <h4 className="font-medium text-[hsl(135,80%,45%)]">Connected to GitLab</h4>
                 <p className="text-xs mt-1 text-gray-300">
                   {projectInfo.name} - Last activity {new Date(projectInfo.last_activity_at).toLocaleDateString()}
                 </p>
@@ -147,7 +147,7 @@ export function GitLabConfig() {
             
             <Button 
               type="submit" 
-              className="w-full bg-[#1A2A20] text-emerald-400 hover:bg-[#1A2A20]/80 border-0 h-9 text-sm"
+              className="w-full bg-[hsl(135,80%,45%)] hover:bg-[hsl(135,80%,40%)] text-[#000] border-0 h-9 text-sm font-medium transition-shadow hover:shadow-[0_0_8px_hsla(135,80%,40%,0.65)]"
               disabled={updateGitlabConfig.isPending}
             >
               {updateGitlabConfig.isPending ? (

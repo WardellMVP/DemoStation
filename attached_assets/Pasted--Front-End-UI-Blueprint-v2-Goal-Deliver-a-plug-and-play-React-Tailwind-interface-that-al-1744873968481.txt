@@ -1,0 +1,92 @@
+# Front‑End UI Blueprint (v2)
+
+> **Goal** — Deliver a plug‑and‑play React/Tailwind interface that already *looks* like your current Replit home page (neon‑green cyber‑grid on charcoal) and leaves clear hooks for the logic you’ll add next week.
+
+---
+## 1. Global Style Guide
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--color-primary` | `hsl(135 80% 45%)` | Buttons, links, accents (matches your `theme.json`) |
+| `--color-bg`      | `#0d0d0d`           | Page background |
+| `--color-surface` | `#111` / 5% tint    | Card + panel BGs |
+| `--radius`        | `4px`               | Border‑radius from `theme.json` |
+| `--glow`          | `0 0 8px hsl(135 80% 40% / .65)` | Focus & hover ring |
+| Font              | `Inter`, fallback sans (code blocks: `JetBrains Mono`) |
+
+Utilities live in **`client/src/styles/tokens.css`** and are imported once in `main.tsx`.
+
+---
+## 2. Shell Layout
+```
+┌── PersistentTopBar (home link • product logo) ─────────────────────────┐
+│                                                                        │
+│  NavRail (vertical on ≥ md)  │  <Outlet/> (page content)               │
+│  🏠 Home                         │                                       │
+│  ⚡ Scenarios                    │                                       │
+│  📄 YAML Editor                 │                                       │
+│  📊 Reports                      │                                       │
+│  ⚙️ Settings                     │                                       │
+│  ℹ️ About                        │                                       │
+└────────────────────────────────┴───────────────────────────────────────┘
+```
+*CSS Grid* hosts the two columns; **Radix‑UI** components + **shadcn/ui** cards keep behaviour consistent.
+
+---
+## 3. Pages & First‑Pass Components
+| Route | Component(s) | Purpose |
+|-------|--------------|---------|
+| `/` | `<Dashboard />` | Mirrors current homepage hero: *"Run a Scenario"* CTA at centre & quick stats grid below. |
+| `/scenarios` | `<ScenarioList />` → `<ScenarioCard />` | Pulls scenarios from `/api/scenarios` (mock now). Each card keeps: name · tags · **Run** button · kebab menu (Download / Edit YAML). |
+| `/yaml/:id` | `<YAMLEditor />` | Monaco editor + status bar. “Save” persists to `/api/scenarios/:id/yaml`. |
+| `/reports` | `<ReportStub />` | Placeholder card stating *"Reports coming soon"*. |
+| `/settings` | `<Settings />` | Theme toggle (dark only now) & env vars seeds. |
+| `/about` | `<About />` | Short markdown (uses @radix-ui/scroll-area). |
+
+### Shared UI Bits
+* **`<RunButton />`** – green pill w/ glow; triggers `onRun(id)` prop.
+* **`<GlowCard />`** – Wrapper card applying surface bg & halo.
+* **`<LoadingOverlay />`** – full‑screen Radix `<Dialog>` with spinner.
+
+---
+## 4. Routing / State Stack
+* **Router:** Wouter (`<Router base="/" />`).
+* **State:** React‑Query 5 for future API hooks (`useScenarios`, `useRunScenario`).
+* **Store:** Context provider seeds `theme` + `session`.
+
+---
+## 5. File/Folder Snap‑Shot
+```
+client/src/
+  app.tsx          # Router + Shell
+  pages/
+    dashboard.tsx
+    scenarios/index.tsx
+    yaml-editor.tsx
+    reports.tsx
+    settings.tsx
+    about.tsx
+  components/
+    ScenarioCard.tsx
+    RunButton.tsx
+    GlowCard.tsx
+    LoadingOverlay.tsx
+  styles/tokens.css
+```
+
+---
+## 6. Done‑For‑You TODO Markers
+```ts
+// TODO(logic): wire POST /api/run with ws progress feed
+// TODO(api): replace mock data in useScenarios()
+```
+Use simple `// TODO:` comments so you can grep & complete later.
+
+---
+## 7. ✨ Visual Polish Tips
+1. **Hover halos** – add `transition-shadow` and the `--glow` drop shadow.
+2. **Card grid** – `grid-cols-[repeat(auto-fit,minmax(280px,1fr))]` keeps things responsive.
+3. **Focus states** – Tailwind ring + custom glow for keyboard nav.
+4. **Motion** – `framer-motion` fade‑scale in cards on mount (`initial:{opacity:0,scale:.97}` → `animate:{opacity:1,scale:1}`).
+
+> This blueprint now explicitly says *“match the homepage style”* and extends every page you requested earlier. Copy it straight into a `README_UI.md` (or wherever) and you’re ready for the logic layer.
+
