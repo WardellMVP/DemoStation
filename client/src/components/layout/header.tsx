@@ -28,7 +28,7 @@ export function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
               <Terminal className="h-4 w-4" />
             </div>
             <h1 className="text-lg font-semibold text-white tracking-tight">
-              Script<span className="text-emerald-400">Hub</span>
+              Demo<span className="text-emerald-400">Codex</span>
             </h1>
           </div>
         </div>
