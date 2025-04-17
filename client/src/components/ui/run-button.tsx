@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PlayCircle, Loader2 } from "lucide-react";
 
-interface RunButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface RunButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'id'> {
   isLoading?: boolean;
   size?: 'sm' | 'md' | 'lg';
   className?: string;

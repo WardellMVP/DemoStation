@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-[#0A0E12] text-gray-100;
+    @apply font-sans antialiased bg-[#0d0d0d] text-gray-100;
   }
 
   /* Custom scrollbar for dark theme */
@@ -18,45 +18,69 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-[#0F1419];
+    @apply bg-[#111];
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-[#1A2A20] rounded;
+    @apply bg-[rgba(60,180,80,0.3)] rounded-[2px];
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-[#2A3E30];
+    @apply bg-[rgba(60,180,80,0.5)];
   }
 }
 
-/* Custom variables for consistent colors */
+/* Custom variables for consistent colors - using tokens.css variables */
 :root {
-  --color-darkest: #0A0E12;
-  --color-darker: #0F1419;
-  --color-dark: #131820;
-  --color-dark-accent: #1A2A20;
-  --color-accent: #10B981; /* Green accent color */
-  --color-accent-dim: rgba(16, 185, 129, 0.2);
-  --color-accent-glow: rgba(16, 185, 129, 0.5);
-  --color-border: #1A2328;
+  --color-darkest: #0d0d0d; /* Main background */
+  --color-darker: #111; /* Card background */
+  --color-dark: #191919; /* Inputs, darker surfaces */
+  --color-dark-accent: rgba(60, 180, 80, 0.1); /* Success background */
+  --color-accent: hsl(135, 80%, 45%); /* Main accent color - green */
+  --color-accent-dim: rgba(60, 180, 80, 0.15); 
+  --color-accent-glow: rgba(60, 180, 80, 0.5);
+  --color-border: #2a2a2a;
 }
 
 /* Custom cybersecurity-focused styles */
 .card-gradient {
-  background: linear-gradient(180deg, var(--color-dark) 0%, var(--color-darker) 100%);
+  background: linear-gradient(180deg, #141414 0%, #0f0f0f 100%);
 }
 
 .text-glow {
-  text-shadow: 0 0 8px var(--color-accent-glow);
+  text-shadow: 0 0 8px rgba(60, 180, 80, 0.5);
 }
 
 .cybr-btn {
   @apply relative inline-flex items-center justify-center px-5 py-2 overflow-hidden font-medium 
-  text-emerald-500 transition-all duration-300 bg-[#0F1419] border border-emerald-500/30 
-  rounded hover:text-white hover:border-emerald-400 hover:bg-emerald-600/20;
+  text-[hsl(135,80%,45%)] transition-all duration-300 bg-[#111] border border-[hsl(135,80%,45%)]/30 
+  rounded-[4px] hover:text-black hover:border-[hsl(135,80%,45%)] hover:bg-[hsl(135,80%,45%)];
 }
 
 .code-font {
-  font-family: 'Source Code Pro', 'Fira Code', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Angular design elements */
+.angular-border {
+  clip-path: polygon(0 5%, 5% 0, 95% 0, 100% 5%, 100% 95%, 95% 100%, 5% 100%, 0 95%);
+}
+
+/* Terminal-style text */
+.terminal-text {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--color-accent);
+  line-height: 1.5;
+}
+
+/* Matrix-style animation for loading states */
+@keyframes matrixFade {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+.matrix-loading {
+  animation: matrixFade 1.5s infinite;
+  font-family: 'JetBrains Mono', monospace;
 }
