@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import ScriptDetail from "@/pages/script-detail";
 import Settings from "@/pages/settings";
+import Scenarios from "@/pages/scenarios";
 import { Layout } from "@/components/layout/layout";
 import { ThemeProvider } from "@/context/theme-provider";
 
@@ -14,6 +15,7 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/scenarios" component={Scenarios} />
         <Route path="/scenarios/:id" component={ScriptDetail} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
