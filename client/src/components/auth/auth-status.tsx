@@ -1,19 +1,36 @@
 import React from 'react';
 import { useAuth } from '@/context/auth-provider';
 import { Button } from '@/components/ui/button';
-import { Loader2, LogIn, LogOut, User } from 'lucide-react';
+import {
+  Loader2,
+  LogIn,
+  LogOut,
+  ShieldAlert,
+  User as UserIcon,
+  Settings,
+  ChevronRight
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Link } from 'wouter';
+
+interface AuthStatusData {
+  configured: boolean;
+  provider: string;
+  message: string;
+}
 
 export function AuthStatus() {
   const { user, isLoading, isAuthenticated, login, logout } = useAuth();
-  
-  interface AuthStatusData {
-    configured: boolean;
-    provider: string;
-    message: string;
-  }
   
   // Get Okta configuration status
   const { data: authStatus, isLoading: isStatusLoading } = useQuery<AuthStatusData>({
@@ -27,9 +44,9 @@ export function AuthStatus() {
   
   if (isLoading || isStatusLoading) {
     return (
-      <div className="flex items-center space-x-2 text-gray-400">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Checking authentication...</span>
+      <div className="flex items-center space-x-2 text-gray-400 p-2 border border-gray-800 bg-black/30 rounded-[4px]">
+        <Loader2 className="h-4 w-4 animate-spin text-green-500" />
+        <span className="text-sm">Authenticating...</span>
       </div>
     );
   }
@@ -37,55 +54,77 @@ export function AuthStatus() {
   // If authentication is not configured
   if (authStatus && !authStatus.configured) {
     return (
-      <div className="flex flex-col space-y-2 p-2">
+      <div className="flex flex-col space-y-2 p-3 border border-yellow-900/50 bg-yellow-950/20 rounded-[4px]">
         <div className="text-amber-500 flex items-center space-x-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          <span>Okta SSO not configured</span>
+          <ShieldAlert className="h-4 w-4" />
+          <span className="text-sm font-medium">Okta SSO not configured</span>
         </div>
-        <p className="text-sm text-gray-400">Authentication credentials need to be set in environment variables.</p>
+        <p className="text-xs text-gray-400">Authentication credentials need to be set in environment variables.</p>
       </div>
     );
   }
   
   if (isAuthenticated && user) {
     return (
-      <Card className="bg-gray-900 border border-gray-800">
-        <CardContent className="p-3 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-8 w-8">
-              {user.avatar ? (
-                <AvatarImage src={user.avatar} alt={user.name} />
-              ) : (
-                <AvatarFallback className="bg-green-900">
-                  {user.name.charAt(0)}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium text-white truncate max-w-[100px]">{user.name}</p>
-              <p className="text-xs text-gray-400 truncate max-w-[100px]">{user.email}</p>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="w-full px-3 py-2 flex justify-between items-center h-auto bg-gray-900/50 border border-gray-800 hover:bg-gray-800 rounded-[4px]">
+            <div className="flex items-center space-x-2">
+              <Avatar className="h-7 w-7 border border-green-700/50">
+                {user.avatar ? (
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                ) : (
+                  <AvatarFallback className="bg-green-900 text-xs">
+                    {user.name.charAt(0)}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <div className="flex flex-col items-start">
+                <p className="text-sm font-medium text-white truncate max-w-[110px]">{user.name}</p>
+                <p className="text-xs text-gray-400 truncate max-w-[110px]">{user.email}</p>
+              </div>
             </div>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-gray-400 hover:text-white" 
+            <ChevronRight className="h-4 w-4 text-green-500" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56 bg-gray-900 border border-gray-800 text-gray-200">
+          <DropdownMenuLabel className="text-green-500">Account</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-gray-800" />
+          <DropdownMenuGroup>
+            <Link href="/profile">
+              <DropdownMenuItem className="cursor-pointer hover:bg-gray-800 focus:bg-gray-800">
+                <UserIcon className="mr-2 h-4 w-4 text-green-500" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/settings">
+              <DropdownMenuItem className="cursor-pointer hover:bg-gray-800 focus:bg-gray-800">
+                <Settings className="mr-2 h-4 w-4 text-green-500" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+            </Link>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator className="bg-gray-800" />
+          <DropdownMenuItem 
+            className="cursor-pointer hover:bg-gray-800 focus:bg-gray-800 text-red-400"
             onClick={logout}
           >
-            <LogOut className="h-4 w-4 mr-1" />
-            Logout
-          </Button>
-        </CardContent>
-      </Card>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Logout</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
   
   return (
-    <Button variant="outline" className="bg-green-900 border-green-700 hover:bg-green-800" onClick={login}>
-      <LogIn className="h-4 w-4 mr-1" />
-      Sign In with Okta
+    <Button 
+      variant="outline" 
+      className="w-full bg-green-900/40 border border-green-700/50 hover:bg-green-800/60 rounded-[4px] text-sm flex items-center gap-2"
+      onClick={login}
+    >
+      <ShieldAlert className="h-4 w-4 text-green-400" />
+      <span>Secure Sign In</span>
     </Button>
   );
 }
