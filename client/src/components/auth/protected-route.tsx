@@ -1,75 +1,62 @@
 import React from 'react';
 import { useAuth } from '@/context/auth-provider';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Shield } from 'lucide-react';
 import { Redirect } from 'wouter';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, ShieldAlert } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   redirectTo?: string;
 }
 
-export function ProtectedRoute({ children, redirectTo = '/' }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // While checking authentication status, show a loading state
+export function ProtectedRoute({ 
+  children, 
+  redirectTo = '/login'
+}: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, login } = useAuth();
+  
+  // If still loading auth state, show loading indicator
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 flex items-center justify-center min-h-[70vh]">
-        <div className="w-full max-w-md">
-          <Card className="border border-gray-800 bg-black/50">
-            <CardHeader>
-              <CardTitle className="text-green-500">Loading</CardTitle>
-              <CardDescription>Verifying authentication status...</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center py-6">
-              <div className="animate-pulse flex space-x-4">
-                <div className="flex-1 space-y-4 py-1">
-                  <div className="h-4 bg-gray-800 rounded w-3/4"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-800 rounded"></div>
-                    <div className="h-4 bg-gray-800 rounded w-5/6"></div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="flex justify-center items-center h-[calc(100vh-120px)]">
+        <Card className="w-full max-w-md bg-black/60 border border-gray-800">
+          <CardContent className="pt-6 flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
+            <p className="text-gray-400">Verifying authentication...</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
-
-  // If not authenticated, show access denied or redirect
+  
+  // If not authenticated, show message with login button
   if (!isAuthenticated) {
     return (
-      <div className="container mx-auto p-4 flex items-center justify-center min-h-[70vh]">
-        <div className="w-full max-w-md">
-          <Card className="border border-gray-800 bg-black/50">
-            <CardHeader>
-              <CardTitle className="text-green-500">Access Denied</CardTitle>
-              <CardDescription>Authentication required</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-6">
-              <Shield className="h-16 w-16 text-green-500 mb-4" />
-              <p className="text-center text-gray-400 mb-4">
-                You need to sign in with your Okta account to access this page.
-              </p>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={() => window.location.href = redirectTo}>
-                Go Back
-              </Button>
-              <Button onClick={() => window.location.href = '/login'}>
-                Sign In
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+      <div className="flex justify-center items-center h-[calc(100vh-120px)]">
+        <Card className="w-full max-w-md bg-black/60 border border-gray-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-center justify-center text-red-500">
+              <ShieldAlert className="h-5 w-5" />
+              Authentication Required
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2 flex flex-col items-center space-y-4">
+            <p className="text-gray-400 text-center">
+              You need to be logged in to access this page.
+            </p>
+            <Button 
+              onClick={login} 
+              className="bg-green-700 hover:bg-green-600 text-white"
+            >
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
-
+  
   // If authenticated, render children
   return <>{children}</>;
 }

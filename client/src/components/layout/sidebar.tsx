@@ -1,3 +1,4 @@
+import React from "react";
 import { cn } from "@/lib/utils";
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/auth-provider";
 import { ThreatScenario } from "@/lib/types";
+import { AuthStatus } from "@/components/auth/auth-status";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -104,6 +106,12 @@ export function Sidebar({ isOpen }: SidebarProps) {
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             Account
           </h2>
+          <div className="mb-3">
+            {/* Add the auth status component */}
+            <div className="px-3">
+              <AuthStatus />
+            </div>
+          </div>
           <nav>
             <ul className="space-y-1">
               <li>
