@@ -1,111 +1,161 @@
-import WebSocket, { WebSocketServer } from 'ws';
 import http from 'http';
+import { WebSocketServer, WebSocket } from 'ws';
 import { ScenarioExecution } from '@shared/schema';
-import { storage } from '../storage';
+import { log } from '../vite';
 
-// Map to store active connections by execution ID
-const connections = new Map<number, Set<WebSocket>>();
+let wss: WebSocketServer | null = null;
+const connections = new Map<number, WebSocket[]>();
 
 export function setupWebsocketServer(server: http.Server) {
-  const wss = new WebSocketServer({ 
-    server, 
-    path: '/ws'
-  });
-
-  wss.on('connection', (ws, req) => {
-    console.log('WebSocket connection established');
+  try {
+    // Create a WebSocket server on the /ws path
+    wss = new WebSocketServer({ server, path: '/ws' });
     
-    // Parse execution ID from URL
-    const url = new URL(req.url || '', `http://${req.headers.host}`);
-    const executionId = parseInt(url.searchParams.get('executionId') || '0');
+    log('WebSocket server initialized on path /ws', 'websocket');
     
-    if (executionId) {
-      // Add this connection to the set for this execution
-      if (!connections.has(executionId)) {
-        connections.set(executionId, new Set());
-      }
-      connections.get(executionId)?.add(ws);
+    wss.on('connection', (ws) => {
+      log('New WebSocket connection established', 'websocket');
       
-      // Set up cleanup on connection close
-      ws.on('close', () => {
-        console.log('WebSocket connection closed');
-        const executionConnections = connections.get(executionId);
-        if (executionConnections) {
-          executionConnections.delete(ws);
-          if (executionConnections.size === 0) {
-            connections.delete(executionId);
+      ws.on('message', (message) => {
+        try {
+          const data = JSON.parse(message.toString());
+          
+          // Handle subscription to execution updates
+          if (data.type === 'subscribe' && data.executionId) {
+            const executionId = Number(data.executionId);
+            
+            // Add this connection to the execution's subscribers
+            if (!connections.has(executionId)) {
+              connections.set(executionId, []);
+            }
+            connections.get(executionId)?.push(ws);
+            
+            log(`Client subscribed to execution ${executionId}`, 'websocket');
+            
+            // Send confirmation to client
+            ws.send(JSON.stringify({ 
+              type: 'subscribed', 
+              executionId, 
+              message: 'Successfully subscribed to execution updates' 
+            }));
           }
+        } catch (error) {
+          log(`Error processing WebSocket message: ${error}`, 'websocket');
         }
       });
-    } else {
-      // Invalid connection without execution ID
-      ws.close(1008, 'Missing executionId');
-    }
-  });
-
-  return wss;
+      
+      ws.on('close', () => {
+        log('WebSocket connection closed', 'websocket');
+        
+        // Remove this connection from all subscriptions
+        connections.forEach((subscribers, executionId) => {
+          const index = subscribers.indexOf(ws);
+          if (index !== -1) {
+            subscribers.splice(index, 1);
+          }
+          
+          // Clean up empty subscription lists
+          if (subscribers.length === 0) {
+            connections.delete(executionId);
+          }
+        });
+      });
+      
+      ws.on('error', (error) => {
+        log(`WebSocket error: ${error}`, 'websocket');
+      });
+      
+      // Send initial welcome message
+      ws.send(JSON.stringify({ 
+        type: 'connect', 
+        message: 'Connected to Demo Codex WebSocket Server',
+        timestamp: new Date().toISOString()
+      }));
+    });
+    
+    return true;
+  } catch (error) {
+    log(`Error setting up WebSocket server: ${error}`, 'websocket');
+    return false;
+  }
 }
 
-// Function to broadcast execution updates to all connected clients
 export function broadcastExecutionUpdate(executionId: number, update: Partial<ScenarioExecution>) {
-  const clients = connections.get(executionId);
-  if (!clients) return;
+  if (!wss) {
+    log('WebSocket server not initialized', 'websocket');
+    return false;
+  }
+  
+  const subscribers = connections.get(executionId) || [];
+  if (subscribers.length === 0) {
+    log(`No subscribers for execution ${executionId}`, 'websocket');
+    return false;
+  }
   
   const message = JSON.stringify({
     type: 'execution_update',
-    data: update
+    executionId,
+    update,
+    timestamp: new Date().toISOString()
   });
   
-  clients.forEach(client => {
+  let deliveredCount = 0;
+  
+  for (const client of subscribers) {
     if (client.readyState === WebSocket.OPEN) {
       client.send(message);
+      deliveredCount++;
     }
-  });
+  }
+  
+  log(`Sent execution update to ${deliveredCount}/${subscribers.length} clients`, 'websocket');
+  return deliveredCount > 0;
 }
 
-// Function to send log output to connected clients
 export function sendExecutionOutput(executionId: number, output: string) {
-  const clients = connections.get(executionId);
-  if (!clients) return;
+  if (!wss) {
+    log('WebSocket server not initialized', 'websocket');
+    return false;
+  }
+  
+  const subscribers = connections.get(executionId) || [];
+  if (subscribers.length === 0) {
+    log(`No subscribers for execution ${executionId}`, 'websocket');
+    return false;
+  }
   
   const message = JSON.stringify({
     type: 'execution_output',
-    data: {
-      timestamp: new Date().toISOString(),
-      text: output
-    }
+    executionId,
+    output,
+    timestamp: new Date().toISOString()
   });
   
-  clients.forEach(client => {
+  let deliveredCount = 0;
+  
+  for (const client of subscribers) {
     if (client.readyState === WebSocket.OPEN) {
       client.send(message);
+      deliveredCount++;
     }
-  });
+  }
+  
+  log(`Sent execution output to ${deliveredCount}/${subscribers.length} clients`, 'websocket');
+  return deliveredCount > 0;
 }
 
-// Update the execution status and broadcast the change
 export async function updateExecutionStatus(
   executionId: number, 
   status: 'running' | 'completed' | 'failed', 
   output?: string
 ) {
-  try {
-    const update: Partial<ScenarioExecution> = { status };
-    if (output) {
-      update.output = output;
-    }
-    
-    // Update in database
-    const updated = await storage.updateScenarioExecution(executionId, update);
-    
-    // Broadcast to clients
-    if (updated) {
-      broadcastExecutionUpdate(executionId, updated);
-    }
-    
-    return updated;
-  } catch (error) {
-    console.error('Error updating execution status:', error);
-    return null;
+  const update: Partial<ScenarioExecution> = { status };
+  if (output !== undefined) {
+    update.output = output;
   }
+  
+  broadcastExecutionUpdate(executionId, update);
+  
+  // Return true to indicate successful broadcast
+  return true;
 }

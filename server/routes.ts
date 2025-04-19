@@ -18,7 +18,7 @@ import {
 } from "@shared/schema";
 import * as yaml from 'js-yaml';
 import { z } from "zod";
-import { executeScenario } from "./runs";
+import { executeScenario, setupWebsocketServer } from "./runs";
 import { fromZodError } from "zod-validation-error";
 
 // GitLab API helper functions
@@ -611,5 +611,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket server for real-time updates
+  setupWebsocketServer(httpServer);
+  
   return httpServer;
 }
