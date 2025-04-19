@@ -163,6 +163,69 @@ export class MemStorage implements IStorage {
     this.gitlabConfig = updatedConfig;
     return this.gitlabConfig;
   }
+  
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+  
+  async getUserByOktaId(oktaId: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.oktaId === oktaId);
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+  
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentUserId++;
+    const now = new Date();
+    
+    const user: User = {
+      id,
+      oktaId: insertUser.oktaId,
+      email: insertUser.email,
+      name: insertUser.name,
+      avatar: insertUser.avatar || null,
+      lastLogin: insertUser.lastLogin || now,
+      createdAt: now
+    };
+    
+    this.users.set(id, user);
+    return user;
+  }
+  
+  async updateUser(id: number, userUpdate: Partial<User>): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...userUpdate };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  // User scenario usage operations
+  async getUserScenarioUsage(userId: number): Promise<UserScenarioUsage[]> {
+    return Array.from(this.userScenarioUsages.values())
+      .filter(usage => usage.userId === userId)
+      .sort((a, b) => new Date(b.usedAt).getTime() - new Date(a.usedAt).getTime());
+  }
+  
+  async createUserScenarioUsage(insertUsage: InsertUserScenarioUsage): Promise<UserScenarioUsage> {
+    const id = this.currentUserScenarioUsageId++;
+    const now = new Date();
+    
+    const usage: UserScenarioUsage = {
+      id,
+      userId: insertUsage.userId,
+      scenarioId: insertUsage.scenarioId,
+      usedAt: now,
+      configSnapshot: insertUsage.configSnapshot || {}
+    };
+    
+    this.userScenarioUsages.set(id, usage);
+    return usage;
+  }
 
   // Threat Scenario operations
   async getAllScenarios(): Promise<ThreatScenario[]> {
@@ -211,12 +274,19 @@ export class MemStorage implements IStorage {
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
   
+  async getUserScenarioExecutions(userId: number): Promise<ScenarioExecution[]> {
+    return Array.from(this.executions.values())
+      .filter(execution => execution.userId === userId)
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+  
   async createScenarioExecution(insertExecution: InsertScenarioExecution): Promise<ScenarioExecution> {
     const id = this.currentExecutionId++;
     // Ensure all required fields have non-undefined values
     const execution: ScenarioExecution = {
       id,
       scenarioId: insertExecution.scenarioId || null,
+      userId: insertExecution.userId || null,
       timestamp: insertExecution.timestamp,
       status: insertExecution.status,
       output: insertExecution.output || null,
