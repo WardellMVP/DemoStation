@@ -15,7 +15,7 @@ export function setupOktaAuth(app: any) {
       userInfoURL: `${oktaIssuer}/v1/userinfo`,
       clientID: process.env.OKTA_CLIENT_ID!,
       clientSecret: process.env.OKTA_CLIENT_SECRET!,
-      callbackURL: '/auth/okta/callback',
+      callbackURL: '/api/auth/okta/callback',
       scope: ['openid', 'profile', 'email']
     } as StrategyOptions,
     async (_issuer: string, profile: any, done: any) => {
@@ -53,9 +53,9 @@ export function setupOktaAuth(app: any) {
   ));
 
   // Setup Okta authentication routes
-  app.get('/auth/okta', passport.authenticate('okta'));
+  app.get('/api/auth/okta', passport.authenticate('okta'));
 
-  app.get('/auth/okta/callback',
+  app.get('/api/auth/okta/callback',
     passport.authenticate('okta', { 
       failureRedirect: '/auth',
       successRedirect: '/'

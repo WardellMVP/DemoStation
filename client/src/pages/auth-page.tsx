@@ -248,7 +248,7 @@ export default function AuthPage() {
                   </div>
                   
                   <a 
-                    href="/auth/okta" 
+                    href="/api/auth/okta" 
                     className="w-full flex items-center justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-white bg-gray-700/50 hover:bg-gray-600/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <ShieldCheck className="mr-2 h-4 w-4 text-blue-400" />
