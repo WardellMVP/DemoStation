@@ -356,9 +356,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const scriptPath = path.join(tempDir, 'script.py');
         await fs.writeFile(scriptPath, scriptContent);
         
-        // Create execution record
+        // Create execution record with user information
         const executionRecord = await storage.createScenarioExecution({
           scenarioId: id,
+          userId: userId || null, // Track which user ran the scenario
           timestamp: new Date().toISOString(),
           status: 'running',
           output: 'Starting execution...',

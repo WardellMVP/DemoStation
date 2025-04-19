@@ -10,6 +10,7 @@ import Profile from "@/pages/profile";
 import { Layout } from "@/components/layout/layout";
 import { ThemeProvider } from "@/context/theme-provider";
 import { AuthProvider } from "@/context/auth-provider";
+import { ProtectedRoute } from "@/components/auth/protected-route";
 
 function Router() {
   return (
@@ -18,7 +19,13 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/scenarios/:id" component={ScriptDetail} />
         <Route path="/settings" component={Settings} />
-        <Route path="/profile" component={Profile} />
+        <Route path="/profile">
+          {() => (
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          )}
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </Layout>
