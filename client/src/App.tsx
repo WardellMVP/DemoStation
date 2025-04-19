@@ -18,6 +18,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/scenarios/:id" component={ScriptDetail} />
         <Route path="/settings" component={Settings} />
+        <Route path="/profile" component={Profile} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -28,8 +29,10 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={queryClient}>
-        <Router />
-        <Toaster />
+        <AuthProvider>
+          <Router />
+          <Toaster />
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

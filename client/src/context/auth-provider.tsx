@@ -1,7 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { User } from '@shared/schema';
+
+// Define our own User type to avoid issues with Date vs null vs undefined
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  oktaId: string;
+  avatar: string | null;
+  lastLogin?: string | null;
+  createdAt?: string | null;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -32,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (data && !error) {
-      setUser(data);
+      setUser(data as User);
     } else {
       setUser(null);
     }

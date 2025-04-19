@@ -94,7 +94,17 @@ export const setupAuth = (app: express.Express) => {
     passport.deserializeUser(async (id: number, done) => {
       try {
         const user = await storage.getUser(id);
-        done(null, user);
+        if (user) {
+          // Convert any null values to undefined to match Express.User interface
+          const adaptedUser = {
+            ...user,
+            lastLogin: user.lastLogin || undefined,
+            createdAt: user.createdAt || undefined
+          };
+          done(null, adaptedUser);
+        } else {
+          done(null, false);
+        }
       } catch (error) {
         done(error);
       }

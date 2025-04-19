@@ -5,8 +5,10 @@ import {
   Shield, 
   ShieldAlert, 
   GitMerge, 
-  History
+  History,
+  User
 } from "lucide-react";
+import { useAuth } from "@/context/auth-provider";
 import { ThreatScenario } from "@/lib/types";
 
 interface SidebarProps {
@@ -15,6 +17,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen }: SidebarProps) {
   const [location] = useLocation();
+  const { isAuthenticated } = useAuth();
   
   const { data: scenarios = [] } = useQuery<ThreatScenario[]>({
     queryKey: ['/api/scenarios'],

@@ -417,6 +417,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get user's scenario usage
+  app.get('/api/user/scenario-usage', requireAuth, async (req: Request, res: Response) => {
+    try {
+      // @ts-ignore - Passport adds user to req
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+      
+      const usageData = await storage.getUserScenarioUsage(userId);
+      res.json(usageData);
+    } catch (error) {
+      console.error('Error fetching user scenario usage:', error);
+      res.status(500).json({ message: 'Error fetching user scenario usage data' });
+    }
+  });
+  
+  // Get user's execution history
+  app.get('/api/user/executions', requireAuth, async (req: Request, res: Response) => {
+    try {
+      // @ts-ignore - Passport adds user to req
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+      
+      const executionHistory = await storage.getUserScenarioExecutions(userId);
+      res.json(executionHistory);
+    } catch (error) {
+      console.error('Error fetching user execution history:', error);
+      res.status(500).json({ message: 'Error fetching user execution history' });
+    }
+  });
+  
   // Get execution details
   app.get('/api/executions/:id', async (req: Request, res: Response) => {
     try {

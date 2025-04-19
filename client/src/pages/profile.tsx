@@ -13,13 +13,13 @@ export default function Profile() {
   const { isAuthenticated, user } = useAuth();
   
   // Get user's scenario usage history
-  const { data: scenarioUsage, isLoading: isUsageLoading } = useQuery({
+  const { data: scenarioUsage = [], isLoading: isUsageLoading } = useQuery<any[]>({
     queryKey: ['/api/user/scenario-usage'],
     enabled: isAuthenticated,
   });
   
   // Get user's execution history
-  const { data: executionHistory, isLoading: isExecutionLoading } = useQuery({
+  const { data: executionHistory = [], isLoading: isExecutionLoading } = useQuery<any[]>({
     queryKey: ['/api/user/executions'],
     enabled: isAuthenticated,
   });
