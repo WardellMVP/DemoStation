@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import ScriptDetail from "@/pages/script-detail";
 import Settings from "@/pages/settings";
 import Profile from "@/pages/profile";
+import AuthPage from "@/pages/auth-page";
 import { Layout } from "@/components/layout/layout";
 import { ThemeProvider } from "@/context/theme-provider";
 import { AuthProvider } from "@/context/auth-provider";
@@ -14,33 +15,35 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/scenarios/:id">
-          {(params) => (
-            <ProtectedRoute>
-              <ScriptDetail id={params.id} />
-            </ProtectedRoute>
-          )}
-        </Route>
-        <Route path="/settings">
-          {() => (
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          )}
-        </Route>
-        <Route path="/profile">
-          {() => (
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          )}
-        </Route>
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/auth" component={AuthPage} />
+      
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/scenarios/:id">
+              {(params) => (
+                <ProtectedRoute path={`/scenarios/${params.id}`}>
+                  <ScriptDetail id={params.id} />
+                </ProtectedRoute>
+              )}
+            </Route>
+            <Route path="/settings">
+              <ProtectedRoute path="/settings">
+                <Settings />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/profile">
+              <ProtectedRoute path="/profile">
+                <Profile />
+              </ProtectedRoute>
+            </Route>
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 

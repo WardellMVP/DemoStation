@@ -57,9 +57,9 @@ export function AuthStatus() {
       <div className="flex flex-col space-y-2 p-3 border border-yellow-900/50 bg-yellow-950/20 rounded-[4px]">
         <div className="text-amber-500 flex items-center space-x-2">
           <ShieldAlert className="h-4 w-4" />
-          <span className="text-sm font-medium">Okta SSO not configured</span>
+          <span className="text-sm font-medium">Authentication not configured</span>
         </div>
-        <p className="text-xs text-gray-400">Authentication credentials need to be set in environment variables.</p>
+        <p className="text-xs text-gray-400">Server authentication system is not properly configured.</p>
       </div>
     );
   }
@@ -121,16 +121,14 @@ export function AuthStatus() {
   }
   
   return (
-    <Button 
-      variant="outline" 
-      className="w-full bg-green-900/40 border border-green-700/50 hover:bg-green-800/60 rounded-[4px] text-sm flex items-center gap-2"
-      onClick={(e) => {
-        e.preventDefault();
-        login();
-      }}
-    >
-      <ShieldAlert className="h-4 w-4 text-green-400" />
-      <span>Secure Sign In</span>
-    </Button>
+    <Link href="/auth">
+      <Button 
+        variant="outline" 
+        className="w-full bg-green-900/40 border border-green-700/50 hover:bg-green-800/60 rounded-[4px] text-sm flex items-center gap-2"
+      >
+        <ShieldAlert className="h-4 w-4 text-green-400" />
+        <span>Secure Sign In</span>
+      </Button>
+    </Link>
   );
 }
