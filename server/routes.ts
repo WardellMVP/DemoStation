@@ -319,83 +319,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Scenario not found' });
       }
       
-      // Create temporary directory for execution
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'scenario-executor-'));
-      const configPath = path.join(tempDir, 'config.yaml');
+      // Get user ID from authentication if available
+      const userId = req.user?.id || null;
       
-      // Write config to temp file
-      await fs.writeFile(configPath, yaml.dump(config || {}));
+      // Use the new executor with WebSocket support
+      const execution = await executeScenario(id, userId, config || {});
       
-      // Get script content from GitLab
-      const projectId = await getGitLabProjectId();
-      const encodedScriptPath = encodeURIComponent(scenario.scriptPath);
-      
-      try {
-        const scriptFileData = await makeGitLabApiRequest(`projects/${projectId}/repository/files/${encodedScriptPath}`, {
-          params: { ref: 'main' }
-        });
-        
-        // GitLab returns base64 encoded content
-        const scriptContent = Buffer.from(scriptFileData.content, 'base64').toString('utf-8');
-        const scriptPath = path.join(tempDir, 'script.py');
-        await fs.writeFile(scriptPath, scriptContent);
-        
-        // Create execution record
-        const executionRecord = await storage.createScenarioExecution({
-          scenarioId: id,
-          timestamp: new Date().toISOString(),
-          status: 'running',
-          output: 'Starting execution...',
-          configSnapshot: config || {}
-        });
-        
-        // Execute the script
-        const process = spawn('python', [scriptPath, '--config', configPath]);
-        
-        let output = '';
-        
-        process.stdout.on('data', (data) => {
-          const chunk = data.toString();
-          output += chunk;
-          console.log(`[Scenario ${id}] ${chunk}`);
-        });
-        
-        process.stderr.on('data', (data) => {
-          const chunk = data.toString();
-          output += `\nERROR: ${chunk}`;
-          console.error(`[Scenario ${id}] ERROR: ${chunk}`);
-        });
-        
-        process.on('close', async (code) => {
-          const status = code === 0 ? 'completed' : 'failed';
-          
-          // Update execution record
-          await storage.updateScenarioExecution(executionRecord.id, {
-            status,
-            output: output || `Process exited with code ${code}`,
-          });
-          
-          // Clean up temp files
-          try {
-            await fs.rm(tempDir, { recursive: true, force: true });
-          } catch (err) {
-            console.error('Error cleaning up temp files:', err);
-          }
-        });
-        
-        res.status(202).json({ 
-          message: 'Scenario execution started', 
-          executionId: executionRecord.id 
-        });
-      } catch (gitlabError) {
-        await fs.rm(tempDir, { recursive: true, force: true });
-        res.status(404).json({ 
-          message: 'Script file not found in GitLab repository' 
-        });
-      }
-    } catch (error) {
+      res.status(202).json({ 
+        message: 'Scenario execution started', 
+        executionId: execution.id 
+      });
+    } catch (error: any) {
       console.error('Error executing scenario:', error);
-      res.status(500).json({ message: 'Error executing scenario' });
+      res.status(500).json({ message: error.message || 'Error executing scenario' });
     }
   });
   
@@ -450,6 +386,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error reloading scenarios:', error);
       res.status(500).json({ message: 'Error reloading scenarios from GitLab' });
+    }
+  });
+  
+  // Get websocket status - for client to check if WebSocket is supported
+  app.get('/api/websocket-status', (req: Request, res: Response) => {
+    res.json({ 
+      supported: true,
+      path: '/ws'
+    });
+  });
+  
+  // Get user run history
+  app.get('/api/run-history', async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      
+      if (userId) {
+        // Get authenticated user's run history
+        const history = await storage.getUserRunHistory(userId);
+        res.json(history);
+      } else {
+        // Get recent global history
+        const history = await storage.getRunHistory();
+        res.json(history);
+      }
+    } catch (error) {
+      console.error('Error fetching run history:', error);
+      res.status(500).json({ message: 'Error fetching run history' });
     }
   });
 

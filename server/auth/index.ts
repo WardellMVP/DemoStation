@@ -192,8 +192,20 @@ export function setupAuth(app: Express) {
   // Authentication middleware for protected routes
   app.use('/api/*', (req: Request, res: Response, next: NextFunction) => {
     // Skip authentication for certain public API routes
-    const publicApiRoutes = ['/api/health', '/api/version', '/api/auth/user'];
+    const publicApiRoutes = [
+      '/api/health', 
+      '/api/version', 
+      '/api/auth/user', 
+      '/api/websocket-status'
+    ];
+    
     if (publicApiRoutes.some(route => req.path.startsWith(route))) {
+      return next();
+    }
+    
+    // Allow all API access in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Auth] Bypassing authentication in development mode');
       return next();
     }
 
