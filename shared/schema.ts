@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -13,6 +13,22 @@ export const gitlabConfig = pgTable("gitlab_config", {
 
 export const insertGitlabConfigSchema = createInsertSchema(gitlabConfig).omit({
   id: true,
+});
+
+// User accounts for Okta SSO
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  oktaId: text("okta_id").unique().notNull(),
+  email: text("email").unique().notNull(),
+  name: text("name").notNull(),
+  avatar: text("avatar"),
+  lastLogin: timestamp("last_login").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Threat scenarios table (replaces scripts)
@@ -32,10 +48,25 @@ export const insertThreatScenarioSchema = createInsertSchema(threatScenarios).om
   id: true,
 });
 
+// User scenario usage tracking
+export const userScenarioUsage = pgTable("user_scenario_usage", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  scenarioId: integer("scenario_id").references(() => threatScenarios.id).notNull(),
+  usedAt: timestamp("used_at").defaultNow().notNull(),
+  configSnapshot: jsonb("config_snapshot"),
+});
+
+export const insertUserScenarioUsageSchema = createInsertSchema(userScenarioUsage).omit({
+  id: true,
+  usedAt: true,
+});
+
 // Scenario executions to track history
 export const scenarioExecutions = pgTable("scenario_executions", {
   id: serial("id").primaryKey(),
   scenarioId: integer("scenario_id").references(() => threatScenarios.id),
+  userId: integer("user_id").references(() => users.id),
   timestamp: text("timestamp").notNull(),
   status: text("status").notNull(),
   output: text("output"),
@@ -66,6 +97,12 @@ export const insertConfigParameterSchema = createInsertSchema(configParameters).
 // Type definitions
 export type GitlabConfig = typeof gitlabConfig.$inferSelect;
 export type InsertGitlabConfig = z.infer<typeof insertGitlabConfigSchema>;
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type UserScenarioUsage = typeof userScenarioUsage.$inferSelect;
+export type InsertUserScenarioUsage = z.infer<typeof insertUserScenarioUsageSchema>;
 
 export type ThreatScenario = typeof threatScenarios.$inferSelect;
 export type InsertThreatScenario = z.infer<typeof insertThreatScenarioSchema>;

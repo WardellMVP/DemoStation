@@ -6,13 +6,28 @@ import {
   ScenarioExecution,
   InsertScenarioExecution,
   ConfigParameter,
-  InsertConfigParameter
+  InsertConfigParameter,
+  User,
+  InsertUser,
+  UserScenarioUsage,
+  InsertUserScenarioUsage
 } from "@shared/schema";
 
 export interface IStorage {
   // GitLab configuration
   getGitlabConfig(): Promise<GitlabConfig | undefined>;
   updateGitlabConfig(config: InsertGitlabConfig): Promise<GitlabConfig>;
+  
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByOktaId(oktaId: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
+  
+  // User scenario usage operations
+  getUserScenarioUsage(userId: number): Promise<UserScenarioUsage[]>;
+  createUserScenarioUsage(usage: InsertUserScenarioUsage): Promise<UserScenarioUsage>;
   
   // Threat scenario operations
   getAllScenarios(): Promise<ThreatScenario[]>;
@@ -23,6 +38,7 @@ export interface IStorage {
   
   // Scenario execution operations
   getScenarioExecutions(scenarioId: number): Promise<ScenarioExecution[]>;
+  getUserScenarioExecutions(userId: number): Promise<ScenarioExecution[]>;
   createScenarioExecution(execution: InsertScenarioExecution): Promise<ScenarioExecution>;
   updateScenarioExecution(id: number, execution: Partial<ScenarioExecution>): Promise<ScenarioExecution | undefined>;
   
@@ -35,19 +51,27 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private gitlabConfig: GitlabConfig | undefined;
+  private users: Map<number, User>;
+  private userScenarioUsages: Map<number, UserScenarioUsage>;
   private scenarios: Map<number, ThreatScenario>;
   private executions: Map<number, ScenarioExecution>;
   private parameters: Map<number, ConfigParameter>;
   
+  private currentUserId: number;
+  private currentUserScenarioUsageId: number;
   private currentScenarioId: number;
   private currentExecutionId: number;
   private currentParameterId: number;
 
   constructor() {
+    this.users = new Map();
+    this.userScenarioUsages = new Map();
     this.scenarios = new Map();
     this.executions = new Map();
     this.parameters = new Map();
     
+    this.currentUserId = 1;
+    this.currentUserScenarioUsageId = 1;
     this.currentScenarioId = 1;
     this.currentExecutionId = 1;
     this.currentParameterId = 1;
