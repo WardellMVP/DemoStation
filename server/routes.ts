@@ -18,6 +18,7 @@ import {
 } from "@shared/schema";
 import * as yaml from 'js-yaml';
 import { z } from "zod";
+import { executeScenario } from "./runs";
 import { fromZodError } from "zod-validation-error";
 
 // GitLab API helper functions

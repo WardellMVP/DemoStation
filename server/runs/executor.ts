@@ -91,9 +91,9 @@ async function executeScenarioProcess(
         console.error('Error cleaning up temporary config file:', err);
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in scenario execution process:', error);
-    await updateExecutionStatus(executionId, 'failed', `Error: ${error.message}`);
+    await updateExecutionStatus(executionId, 'failed', `Error: ${error.message || 'Unknown error'}`);
     
     // Update run history
     await storage.updateRunHistory(runHistoryId, {
