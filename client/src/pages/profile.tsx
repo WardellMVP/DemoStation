@@ -24,9 +24,8 @@ export default function Profile() {
   // Get user data with our new hook
   const { 
     scenarioUsage, 
-    isLoadingUsage, 
-    executionHistory, 
-    isLoadingExecutions 
+    executionHistory,
+    isLoading
   } = useUserData();
   
   // Get all scenarios to map IDs to names
@@ -59,7 +58,7 @@ export default function Profile() {
                       <CardDescription>Your recently used scenarios</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {isLoadingUsage ? (
+                      {isLoading ? (
                         <div className="space-y-4">
                           <Skeleton className="h-12 w-full" />
                           <Skeleton className="h-12 w-full" />
@@ -106,7 +105,7 @@ export default function Profile() {
                       <CardDescription>Your recent scenario executions</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {isLoadingExecutions ? (
+                      {isLoading ? (
                         <div className="space-y-4">
                           <Skeleton className="h-12 w-full" />
                           <Skeleton className="h-12 w-full" />
