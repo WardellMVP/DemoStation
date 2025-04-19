@@ -151,7 +151,10 @@ export function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
                   
                   <DropdownMenuItem 
                     className="cursor-pointer hover:bg-[#111] focus:bg-[#111] hover:text-red-400 focus:text-red-400 text-gray-300"
-                    onClick={logout}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      logout();
+                    }}
                   >
                     <Lock className="mr-2 h-4 w-4 text-red-400" />
                     <span>Secure Logout</span>
@@ -163,7 +166,10 @@ export function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
                 variant="outline" 
                 size="sm" 
                 className="rounded-[4px] bg-green-900/20 hover:bg-green-900/30 border border-green-700/50 hover:border-green-600/70 text-xs flex items-center px-3 h-8 text-green-400 hover:text-green-300"
-                onClick={login}
+                onClick={(e) => {
+                  e.preventDefault();
+                  login();
+                }}
               >
                 <ShieldAlert className="mr-2 h-3.5 w-3.5" />
                 Secure Login

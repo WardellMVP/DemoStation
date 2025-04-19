@@ -17,8 +17,20 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/scenarios/:id" component={ScriptDetail} />
-        <Route path="/settings" component={Settings} />
+        <Route path="/scenarios/:id">
+          {(params) => (
+            <ProtectedRoute>
+              <ScriptDetail id={params.id} />
+            </ProtectedRoute>
+          )}
+        </Route>
+        <Route path="/settings">
+          {() => (
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          )}
+        </Route>
         <Route path="/profile">
           {() => (
             <ProtectedRoute>

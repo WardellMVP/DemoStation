@@ -107,7 +107,10 @@ export function AuthStatus() {
           <DropdownMenuSeparator className="bg-gray-800" />
           <DropdownMenuItem 
             className="cursor-pointer hover:bg-gray-800 focus:bg-gray-800 text-red-400"
-            onClick={logout}
+            onClick={(e) => {
+              e.preventDefault();
+              logout();
+            }}
           >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Logout</span>
@@ -121,7 +124,10 @@ export function AuthStatus() {
     <Button 
       variant="outline" 
       className="w-full bg-green-900/40 border border-green-700/50 hover:bg-green-800/60 rounded-[4px] text-sm flex items-center gap-2"
-      onClick={login}
+      onClick={(e) => {
+        e.preventDefault();
+        login();
+      }}
     >
       <ShieldAlert className="h-4 w-4 text-green-400" />
       <span>Secure Sign In</span>
