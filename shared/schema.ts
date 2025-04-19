@@ -1,6 +1,36 @@
-import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Users table for authentication
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  provider: text("provider").notNull(), // 'azure', 'okta'
+  providerId: text("provider_id").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow()
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true
+});
+
+// Run History for tracking scenario executions
+export const runHistory = pgTable("run_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  scenarioId: text("scenario_id").notNull(), 
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  finishedAt: timestamp("finished_at"),
+  status: text("status").notNull(), // 'pending', 'success', 'error'
+  artefactPath: text("artefact_path")
+});
+
+export const insertRunHistorySchema = createInsertSchema(runHistory).omit({
+  id: true
+});
 
 // Global GitLab configuration
 export const gitlabConfig = pgTable("gitlab_config", {
@@ -36,6 +66,7 @@ export const insertThreatScenarioSchema = createInsertSchema(threatScenarios).om
 export const scenarioExecutions = pgTable("scenario_executions", {
   id: serial("id").primaryKey(),
   scenarioId: integer("scenario_id").references(() => threatScenarios.id),
+  userId: integer("user_id").references(() => users.id),
   timestamp: text("timestamp").notNull(),
   status: text("status").notNull(),
   output: text("output"),
@@ -64,6 +95,12 @@ export const insertConfigParameterSchema = createInsertSchema(configParameters).
 });
 
 // Type definitions
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type RunHistory = typeof runHistory.$inferSelect;
+export type InsertRunHistory = z.infer<typeof insertRunHistorySchema>;
+
 export type GitlabConfig = typeof gitlabConfig.$inferSelect;
 export type InsertGitlabConfig = z.infer<typeof insertGitlabConfigSchema>;
 
