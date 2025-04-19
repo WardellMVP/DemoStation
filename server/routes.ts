@@ -18,6 +18,7 @@ import {
 } from "@shared/schema";
 import * as yaml from 'js-yaml';
 import { z } from "zod";
+import { requireAuth } from "./auth";
 import { fromZodError } from "zod-validation-error";
 
 // GitLab API helper functions
@@ -306,8 +307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Execute a scenario
-  app.post('/api/scenarios/:id/execute', async (req: Request, res: Response) => {
+  // Execute a scenario (protected)
+  app.post('/api/scenarios/:id/execute', requireAuth, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const { config } = req.body;

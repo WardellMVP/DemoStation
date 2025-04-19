@@ -1,11 +1,27 @@
 import passport from 'passport';
-import { Strategy as OpenIDConnectStrategy } from 'passport-openidconnect';
+import { Strategy as OpenIDConnectStrategy, Profile } from 'passport-openidconnect';
 import session from 'express-session';
 import PgSession from 'connect-pg-simple';
 import express, { Request, Response, NextFunction } from 'express';
 import { storage } from './storage';
 import { User, InsertUser } from '@shared/schema';
 import { pool } from './db';
+
+// Extend Express types to include user
+declare global {
+  namespace Express {
+    // Custom interface for user in passport session
+    interface User {
+      id: number;
+      email: string;
+      name: string;
+      oktaId: string;
+      avatar: string | null;
+      lastLogin?: Date;
+      createdAt?: Date;
+    }
+  }
+}
 
 // Configure session storage with PostgreSQL
 const PostgresStore = PgSession(session);
