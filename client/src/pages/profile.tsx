@@ -7,10 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { formatRelativeTime } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useQuery } from '@tanstack/react-query';
+import { useUserData } from '@/hooks/use-user-data';
+import { UserScenarioUsage, ScenarioExecution, ThreatScenario } from '@/lib/types';
+import { useScenarios } from '@/hooks/use-scenarios';
 
 export default function Profile() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   // Get the current location to check for tab query param
   const urlParams = new URLSearchParams(window.location.search);
@@ -19,17 +21,17 @@ export default function Profile() {
     ? tabFromUrl 
     : 'usage';
   
-  // Get user's scenario usage history
-  const { data: scenarioUsage = [], isLoading: isUsageLoading } = useQuery<any[]>({
-    queryKey: ['/api/user/scenario-usage'],
-    enabled: isAuthenticated,
-  });
+  // Get user data with our new hook
+  const { 
+    scenarioUsage, 
+    isLoadingUsage, 
+    executionHistory, 
+    isLoadingExecutions 
+  } = useUserData();
   
-  // Get user's execution history
-  const { data: executionHistory = [], isLoading: isExecutionLoading } = useQuery<any[]>({
-    queryKey: ['/api/user/executions'],
-    enabled: isAuthenticated,
-  });
+  // Get all scenarios to map IDs to names
+  const { getAllScenarios } = useScenarios();
+  const { data: scenarios = [] } = getAllScenarios() as { data: ThreatScenario[] };
   
   return (
     <Layout>
@@ -57,7 +59,7 @@ export default function Profile() {
                       <CardDescription>Your recently used scenarios</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {isUsageLoading ? (
+                      {isLoadingUsage ? (
                         <div className="space-y-4">
                           <Skeleton className="h-12 w-full" />
                           <Skeleton className="h-12 w-full" />
@@ -65,19 +67,27 @@ export default function Profile() {
                         </div>
                       ) : scenarioUsage && scenarioUsage.length > 0 ? (
                         <ul className="space-y-4">
-                          {scenarioUsage.map((usage: any) => (
-                            <li key={usage.id} className="flex justify-between p-3 border border-gray-800 rounded-md bg-gray-900/50">
-                              <div>
-                                <p className="font-medium text-white">{usage.scenarioName}</p>
-                                <p className="text-sm text-gray-400">
-                                  Last used {formatRelativeTime(usage.lastUsed)}
-                                </p>
-                              </div>
-                              <Badge className="bg-green-700 self-center">
-                                {usage.useCount} {usage.useCount === 1 ? 'use' : 'uses'}
-                              </Badge>
-                            </li>
-                          ))}
+                          {scenarioUsage.map((usage: UserScenarioUsage) => {
+                            // Find the scenario name from the ID
+                            const scenario = scenarios.find(s => s.id === usage.scenarioId);
+                            return (
+                              <li key={usage.id} className="flex justify-between p-3 border border-gray-800 rounded-md bg-gray-900/50">
+                                <div>
+                                  <p className="font-medium text-white">
+                                    {scenario?.name || `Scenario ID ${usage.scenarioId}`}
+                                  </p>
+                                  <p className="text-sm text-gray-400">
+                                    Last used {formatRelativeTime(usage.usedAt)}
+                                  </p>
+                                </div>
+                                <div className="self-center">
+                                  <Badge variant="outline" className="bg-green-700 border-green-600">
+                                    {new Date(usage.usedAt).toLocaleDateString()}
+                                  </Badge>
+                                </div>
+                              </li>
+                            );
+                          })}
                         </ul>
                       ) : (
                         <div className="text-center py-8 text-gray-400">
@@ -96,7 +106,7 @@ export default function Profile() {
                       <CardDescription>Your recent scenario executions</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {isExecutionLoading ? (
+                      {isLoadingExecutions ? (
                         <div className="space-y-4">
                           <Skeleton className="h-12 w-full" />
                           <Skeleton className="h-12 w-full" />
@@ -104,23 +114,29 @@ export default function Profile() {
                         </div>
                       ) : executionHistory && executionHistory.length > 0 ? (
                         <ul className="space-y-4">
-                          {executionHistory.map((execution: any) => (
-                            <li key={execution.id} className="p-3 border border-gray-800 rounded-md bg-gray-900/50">
-                              <div className="flex justify-between mb-2">
-                                <p className="font-medium text-white">{execution.scenarioName}</p>
-                                <Badge className={
-                                  execution.status === 'completed' ? 'bg-green-700' :
-                                  execution.status === 'failed' ? 'bg-red-700' : 
-                                  'bg-yellow-700'
-                                }>
-                                  {execution.status}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-gray-400">
-                                Executed {formatRelativeTime(execution.timestamp)}
-                              </p>
-                            </li>
-                          ))}
+                          {executionHistory.map((execution: ScenarioExecution) => {
+                            // Find the scenario name from the ID
+                            const scenario = scenarios.find(s => s.id === execution.scenarioId);
+                            return (
+                              <li key={execution.id} className="p-3 border border-gray-800 rounded-md bg-gray-900/50">
+                                <div className="flex justify-between mb-2">
+                                  <p className="font-medium text-white">
+                                    {scenario?.name || `Scenario ID ${execution.scenarioId}`}
+                                  </p>
+                                  <Badge className={
+                                    execution.status === 'completed' ? 'bg-green-700' :
+                                    execution.status === 'failed' ? 'bg-red-700' : 
+                                    'bg-yellow-700'
+                                  }>
+                                    {execution.status}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-gray-400">
+                                  Executed {formatRelativeTime(execution.timestamp)}
+                                </p>
+                              </li>
+                            );
+                          })}
                         </ul>
                       ) : (
                         <div className="text-center py-8 text-gray-400">

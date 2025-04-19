@@ -62,8 +62,20 @@ export interface GitLabFile {
 
 export interface User {
   id: number;
-  username: string;
-  gitlabToken?: string;
+  name: string;
+  email: string;
+  oktaId: string;
+  avatar: string | null;
+  lastLogin?: string | null;
+  createdAt?: string | null;
+}
+
+export interface UserScenarioUsage {
+  id: number;
+  userId: number;
+  scenarioId: number;
+  usedAt: string;
+  configSnapshot: Record<string, any>;
 }
 
 export interface YamlEditorState {
