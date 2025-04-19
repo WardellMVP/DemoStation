@@ -50,20 +50,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
                       : "text-gray-300 hover:bg-[#191919] hover:text-[hsl(135,80%,45%)]"
                   )}>
                     <Shield className="h-4 w-4 mr-3" />
-                    <span>Dashboard</span>
-                  </div>
-                </Link>
-              </li>
-              <li>
-                <Link href="/scenarios">
-                  <div className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-[4px] cursor-pointer",
-                    location === '/scenarios'
-                      ? "bg-[rgba(60,180,80,0.15)] text-[hsl(135,80%,45%)] border border-[rgba(60,180,80,0.3)]"
-                      : "text-gray-300 hover:bg-[#191919] hover:text-[hsl(135,80%,45%)]"
-                  )}>
-                    <ShieldAlert className="h-4 w-4 mr-3" />
-                    <span>Threat Scenarios</span>
+                    <span>Scenarios</span>
                   </div>
                 </Link>
               </li>

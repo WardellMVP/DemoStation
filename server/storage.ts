@@ -6,25 +6,10 @@ import {
   ScenarioExecution,
   InsertScenarioExecution,
   ConfigParameter,
-  InsertConfigParameter,
-  User,
-  InsertUser,
-  RunHistory,
-  InsertRunHistory
+  InsertConfigParameter
 } from "@shared/schema";
 
 export interface IStorage {
-  // User operations
-  getUser(id: number): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  
-  // Run history operations
-  getRunHistory(limit?: number): Promise<RunHistory[]>;
-  getUserRunHistory(userId: number, limit?: number): Promise<RunHistory[]>;
-  createRunHistory(runHistory: InsertRunHistory): Promise<RunHistory>;
-  updateRunHistory(id: number, runHistory: Partial<RunHistory>): Promise<RunHistory | undefined>;
-  
   // GitLab configuration
   getGitlabConfig(): Promise<GitlabConfig | undefined>;
   updateGitlabConfig(config: InsertGitlabConfig): Promise<GitlabConfig>;
@@ -49,28 +34,20 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private runHistory: Map<number, RunHistory>;
   private gitlabConfig: GitlabConfig | undefined;
   private scenarios: Map<number, ThreatScenario>;
   private executions: Map<number, ScenarioExecution>;
   private parameters: Map<number, ConfigParameter>;
   
-  private currentUserId: number;
-  private currentRunHistoryId: number;
   private currentScenarioId: number;
   private currentExecutionId: number;
   private currentParameterId: number;
 
   constructor() {
-    this.users = new Map();
-    this.runHistory = new Map();
     this.scenarios = new Map();
     this.executions = new Map();
     this.parameters = new Map();
     
-    this.currentUserId = 1;
-    this.currentRunHistoryId = 1;
     this.currentScenarioId = 1;
     this.currentExecutionId = 1;
     this.currentParameterId = 1;
@@ -144,67 +121,6 @@ export class MemStorage implements IStorage {
     });
   }
 
-  // User operations
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-  
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
-  }
-  
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = {
-      id,
-      email: insertUser.email,
-      name: insertUser.name || null,
-      provider: insertUser.provider,
-      providerId: insertUser.providerId,
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
-    return user;
-  }
-  
-  // Run history operations
-  async getRunHistory(limit: number = 10): Promise<RunHistory[]> {
-    return Array.from(this.runHistory.values())
-      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-      .slice(0, limit);
-  }
-  
-  async getUserRunHistory(userId: number, limit: number = 10): Promise<RunHistory[]> {
-    return Array.from(this.runHistory.values())
-      .filter(run => run.userId === userId)
-      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-      .slice(0, limit);
-  }
-  
-  async createRunHistory(insertRunHistory: InsertRunHistory): Promise<RunHistory> {
-    const id = this.currentRunHistoryId++;
-    const runHistory: RunHistory = {
-      id,
-      userId: insertRunHistory.userId,
-      scenarioId: insertRunHistory.scenarioId,
-      startedAt: insertRunHistory.startedAt || new Date(),
-      finishedAt: insertRunHistory.finishedAt || null,
-      status: insertRunHistory.status,
-      artefactPath: insertRunHistory.artefactPath || null
-    };
-    this.runHistory.set(id, runHistory);
-    return runHistory;
-  }
-  
-  async updateRunHistory(id: number, runHistoryUpdate: Partial<RunHistory>): Promise<RunHistory | undefined> {
-    const runHistory = this.runHistory.get(id);
-    if (!runHistory) return undefined;
-    
-    const updatedRunHistory = { ...runHistory, ...runHistoryUpdate };
-    this.runHistory.set(id, updatedRunHistory);
-    return updatedRunHistory;
-  }
-  
   // GitLab Configuration
   async getGitlabConfig(): Promise<GitlabConfig | undefined> {
     return this.gitlabConfig;
@@ -276,7 +192,6 @@ export class MemStorage implements IStorage {
     // Ensure all required fields have non-undefined values
     const execution: ScenarioExecution = {
       id,
-      userId: insertExecution.userId || null,
       scenarioId: insertExecution.scenarioId || null,
       timestamp: insertExecution.timestamp,
       status: insertExecution.status,
