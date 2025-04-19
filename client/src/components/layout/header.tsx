@@ -1,6 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Menu, Terminal, Search, User } from "lucide-react";
+import { Menu, Terminal, Search, User, LogOut, Shield, UserCircle, Settings, BarChart } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/context/auth-provider";
+import { Link } from "wouter";
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -8,6 +19,8 @@ interface HeaderProps {
 }
 
 export function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
+  const { user, isAuthenticated, login, logout } = useAuth();
+  
   return (
     <header className="bg-[#0d0d0d] border-b border-[#2a2a2a] h-14 fixed top-0 left-0 right-0 z-40 shadow-sm">
       <div className="flex items-center justify-between px-5 h-full">
@@ -46,9 +59,72 @@ export function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
           
           {/* User profile */}
           <div className="relative">
-            <Button variant="ghost" size="icon" className="w-8 h-8 rounded-[4px] bg-[#191919] hover:bg-[#222] border border-[#2a2a2a] hover:border-[hsl(135,80%,45%)] flex items-center justify-center text-gray-400">
-              <User className="h-4 w-4" />
-            </Button>
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-[4px] bg-[#191919] hover:bg-[#222] border border-[#2a2a2a] hover:border-[hsl(135,80%,45%)] flex items-center justify-center">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={user?.avatar || undefined} alt={user?.name} />
+                      <AvatarFallback className="bg-[#222] text-green-500 text-xs">
+                        <UserCircle className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-[#0d0d0d] border-[#2a2a2a] text-gray-300 rounded-[4px] mr-2 mt-1">
+                  <div className="flex items-center justify-start p-2 border-b border-[#222]">
+                    <Avatar className="h-8 w-8 mr-2">
+                      <AvatarImage src={user?.avatar || undefined} alt={user?.name} />
+                      <AvatarFallback className="bg-[#222] text-green-500">
+                        <UserCircle className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <p className="text-sm font-medium text-white">{user?.name}</p>
+                      <p className="text-xs text-gray-500 truncate max-w-[180px]">{user?.email}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuGroup>
+                    <Link href="/profile">
+                      <DropdownMenuItem className="cursor-pointer hover:bg-[#191919] hover:text-[hsl(135,80%,45%)]">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/profile?tab=usage">
+                      <DropdownMenuItem className="cursor-pointer hover:bg-[#191919] hover:text-[hsl(135,80%,45%)]">
+                        <BarChart className="mr-2 h-4 w-4" />
+                        <span>Activity</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/profile?tab=settings">
+                      <DropdownMenuItem className="cursor-pointer hover:bg-[#191919] hover:text-[hsl(135,80%,45%)]">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Settings</span>
+                      </DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator className="bg-[#222]" />
+                  <DropdownMenuItem 
+                    className="cursor-pointer hover:bg-[#191919] hover:text-red-400"
+                    onClick={logout}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="rounded-[4px] bg-[#191919] hover:bg-[#222] border border-[#2a2a2a] hover:border-[hsl(135,80%,45%)] text-xs flex items-center"
+                onClick={login}
+              >
+                <Shield className="mr-2 h-3.5 w-3.5 text-[hsl(135,80%,45%)]" />
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </div>
