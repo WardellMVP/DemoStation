@@ -53,10 +53,8 @@ export function useScenarios() {
   // Execute a scenario
   const executeScenario = useMutation({
     mutationFn: async ({ id, config }: { id: number; config: any }) => {
-      return apiRequest(`/api/scenarios/${id}/execute`, {
-        method: 'POST',
-        body: JSON.stringify({ config }),
-      });
+      const response = await apiRequest('POST', `/api/scenarios/${id}/execute`, { config });
+      return response.json();
     },
     onSuccess: (data, variables) => {
       toast({
@@ -65,8 +63,9 @@ export function useScenarios() {
       });
       // Invalidate the executions query to refetch the data
       queryClient.invalidateQueries({ queryKey: ['/api/scenarios', variables.id, 'executions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/executions'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Error',
         description: error.message || 'Failed to execute scenario',
@@ -78,9 +77,8 @@ export function useScenarios() {
   // Reload scenarios from GitLab
   const reloadScenarios = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/reload-scenarios', {
-        method: 'POST',
-      });
+      const response = await apiRequest('POST', '/api/reload-scenarios', null);
+      return response.json();
     },
     onSuccess: () => {
       toast({
