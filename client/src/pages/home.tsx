@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Search, GitMerge } from "lucide-react";
 import { GlowCard } from "@/components/ui/glow-card";
+import { OktaStatus } from "@/components/auth/okta-status";
 
 export default function Home() {
   const { scripts, isLoadingScripts } = useScripts();
@@ -20,6 +21,9 @@ export default function Home() {
   
   return (
     <div className="space-y-6">
+      {/* Okta configuration status alert */}
+      <OktaStatus />
+      
       <div className="mb-6 fade-in">
         <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
           Demo<span className="text-[hsl(135,80%,45%)] text-glow">Codex</span>

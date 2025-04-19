@@ -137,6 +137,21 @@ export const setupAuth = (app: express.Express) => {
       res.status(401).json({ error: 'Not authenticated' });
     }
   });
+  
+  // Endpoint to check if Okta is configured
+  app.get('/api/auth/status', (req, res) => {
+    const isConfigured = !!(
+      process.env.OKTA_ISSUER && 
+      process.env.OKTA_CLIENT_ID && 
+      process.env.OKTA_CLIENT_SECRET
+    );
+    
+    res.json({ 
+      configured: isConfigured,
+      provider: 'okta',
+      message: isConfigured ? 'Authentication configured' : 'Authentication not configured'
+    });
+  });
 };
 
 // Middleware to require authentication

@@ -12,6 +12,13 @@ import { useQuery } from '@tanstack/react-query';
 export default function Profile() {
   const { isAuthenticated, user } = useAuth();
   
+  // Get the current location to check for tab query param
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabFromUrl = urlParams.get('tab');
+  const defaultTab = tabFromUrl === 'usage' || tabFromUrl === 'executions' || tabFromUrl === 'settings' 
+    ? tabFromUrl 
+    : 'usage';
+  
   // Get user's scenario usage history
   const { data: scenarioUsage = [], isLoading: isUsageLoading } = useQuery<any[]>({
     queryKey: ['/api/user/scenario-usage'],
@@ -36,7 +43,7 @@ export default function Profile() {
           
           <div className="md:col-span-2">
             {isAuthenticated ? (
-              <Tabs defaultValue="usage" className="w-full">
+              <Tabs defaultValue={defaultTab} className="w-full">
                 <TabsList className="bg-gray-900 border border-gray-800">
                   <TabsTrigger value="usage">Scenario Usage</TabsTrigger>
                   <TabsTrigger value="executions">Execution History</TabsTrigger>
