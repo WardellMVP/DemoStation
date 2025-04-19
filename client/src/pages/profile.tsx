@@ -8,8 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { formatRelativeTime } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserData } from '@/hooks/use-user-data';
-import { UserScenarioUsage, ScenarioExecution, ThreatScenario } from '@/lib/types';
+import { ThreatScenario } from '@/lib/types';
 import { useScenarios } from '@/hooks/use-scenarios';
+
+// Import types from our hook instead of lib/types to avoid mismatches
+import type { UserScenarioUsage, ScenarioExecution } from '@/hooks/use-user-data';
 
 export default function Profile() {
   const { isAuthenticated } = useAuth();

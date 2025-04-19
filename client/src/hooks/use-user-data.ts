@@ -3,7 +3,8 @@ import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/context/auth-provider';
 import { toast } from '@/hooks/use-toast';
 
-interface UserScenarioUsage {
+// Export these type definitions so they can be imported elsewhere
+export interface UserScenarioUsage {
   id: number;
   userId: number;
   scenarioId: number;
@@ -14,14 +15,14 @@ interface UserScenarioUsage {
   configSnapshot?: Record<string, any> | null;
 }
 
-interface ScenarioExecution {
+export interface ScenarioExecution {
   id: number;
   userId: number;
   scenarioId: number;
   startedAt: string;
   completedAt: string | null;
   timestamp: string;
-  status: string;
+  status: 'running' | 'completed' | 'failed';
   results: string | null;
   output: string | null;
   parameters: Record<string, any> | null;
