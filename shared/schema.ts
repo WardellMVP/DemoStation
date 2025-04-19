@@ -15,10 +15,9 @@ export const insertGitlabConfigSchema = createInsertSchema(gitlabConfig).omit({
   id: true,
 });
 
-// User accounts for both Okta SSO and local authentication
+// User accounts
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  oktaId: text("okta_id").unique(),
   email: text("email").unique().notNull(),
   name: text("name").notNull(),
   password: text("password"),

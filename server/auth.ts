@@ -24,7 +24,6 @@ declare global {
       email: string;
       name: string;
       password?: string;
-      oktaId?: string;
       avatar: string | null;
       lastLogin?: Date;
       createdAt?: Date;

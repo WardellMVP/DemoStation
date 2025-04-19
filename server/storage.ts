@@ -21,8 +21,8 @@ export interface IStorage {
   
   // User operations
   getUser(id: number): Promise<User | undefined>;
-  getUserByOktaId(oktaId: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByOktaId(oktaId: string): Promise<User | undefined>; // Kept for interface compatibility
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
   
@@ -170,8 +170,9 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
   
+  // Implementation kept for interface compatibility
   async getUserByOktaId(oktaId: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.oktaId === oktaId);
+    return undefined;
   }
   
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -184,7 +185,6 @@ export class MemStorage implements IStorage {
     
     const user: User = {
       id,
-      oktaId: insertUser.oktaId || null,
       email: insertUser.email,
       name: insertUser.name,
       password: insertUser.password || null,

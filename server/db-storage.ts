@@ -54,9 +54,9 @@ export class DatabaseStorage implements IStorage {
     return results.length > 0 ? results[0] : undefined;
   }
 
+  // No longer needed as we're using local auth only
   async getUserByOktaId(oktaId: string): Promise<User | undefined> {
-    const results = await db.select().from(users).where(eq(users.oktaId, oktaId));
-    return results.length > 0 ? results[0] : undefined;
+    return undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
