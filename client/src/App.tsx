@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -10,35 +10,53 @@ import Profile from "@/pages/profile";
 import AuthPage from "@/pages/auth-page";
 import { Layout } from "@/components/layout/layout";
 import { ThemeProvider } from "@/context/theme-provider";
-import { AuthProvider } from "@/context/auth-provider";
-import { ProtectedRoute } from "@/components/auth/protected-route";
+import { AuthProvider, useAuth } from "@/context/auth-provider";
+import { Shield } from "lucide-react";
 
-function Router() {
+function MainRouter() {
+  const { user, isLoading } = useAuth();
+  const isAuthenticated = !!user;
+
+  // If loading, show nothing yet
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-gray-900">
+        <div className="flex flex-col items-center gap-4">
+          <Shield className="h-12 w-12 text-blue-400 animate-pulse" />
+          <p className="text-gray-300">Loading Demo Codex...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, only show auth page
+  if (!isAuthenticated) {
+    return (
+      <Switch>
+        <Route path="/auth" component={AuthPage} />
+        <Route>
+          <AuthPage />
+        </Route>
+      </Switch>
+    );
+  }
+
+  // If authenticated, show main application
   return (
     <Switch>
-      <Route path="/auth" component={AuthPage} />
+      <Route path="/auth">
+        <Home />
+      </Route>
       
       <Route>
         <Layout>
           <Switch>
             <Route path="/" component={Home} />
             <Route path="/scenarios/:id">
-              {(params) => (
-                <ProtectedRoute path={`/scenarios/${params.id}`}>
-                  <ScriptDetail id={params.id} />
-                </ProtectedRoute>
-              )}
+              {(params) => <ScriptDetail id={parseInt(params.id, 10)} />}
             </Route>
-            <Route path="/settings">
-              <ProtectedRoute path="/settings">
-                <Settings />
-              </ProtectedRoute>
-            </Route>
-            <Route path="/profile">
-              <ProtectedRoute path="/profile">
-                <Profile />
-              </ProtectedRoute>
-            </Route>
+            <Route path="/settings" component={Settings} />
+            <Route path="/profile" component={Profile} />
             <Route component={NotFound} />
           </Switch>
         </Layout>
@@ -52,7 +70,7 @@ function App() {
     <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Router />
+          <MainRouter />
           <Toaster />
         </AuthProvider>
       </QueryClientProvider>
