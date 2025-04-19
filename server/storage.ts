@@ -184,9 +184,10 @@ export class MemStorage implements IStorage {
     
     const user: User = {
       id,
-      oktaId: insertUser.oktaId,
+      oktaId: insertUser.oktaId || null,
       email: insertUser.email,
       name: insertUser.name,
+      password: insertUser.password || null,
       avatar: insertUser.avatar || null,
       lastLogin: insertUser.lastLogin || now,
       createdAt: now
