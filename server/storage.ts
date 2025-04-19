@@ -12,6 +12,7 @@ import {
   UserScenarioUsage,
   InsertUserScenarioUsage
 } from "@shared/schema";
+import { DatabaseStorage } from './db-storage';
 
 export interface IStorage {
   // GitLab configuration
@@ -343,4 +344,11 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Check if DATABASE_URL is available to determine which storage to use
+const useDatabase = !!process.env.DATABASE_URL;
+
+export const storage = useDatabase 
+  ? new DatabaseStorage() 
+  : new MemStorage();
+
+console.log(`Using ${useDatabase ? 'database' : 'in-memory'} storage for application data`);
