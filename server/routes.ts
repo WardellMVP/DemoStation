@@ -312,11 +312,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const { config } = req.body;
+      // @ts-ignore - Passport adds user to req
+      const userId = req.user?.id;
       
       const scenario = await storage.getScenario(id);
       
       if (!scenario) {
         return res.status(404).json({ message: 'Scenario not found' });
+      }
+      
+      // Track usage for the user
+      if (userId) {
+        try {
+          await storage.createUserScenarioUsage({
+            userId,
+            scenarioId: id,
+            configSnapshot: config || {}
+          });
+        } catch (usageError) {
+          console.warn('Failed to track scenario usage:', usageError);
+          // Continue execution even if usage tracking fails
+        }
       }
       
       // Create temporary directory for execution

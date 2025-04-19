@@ -100,6 +100,30 @@ export function Sidebar({ isOpen }: SidebarProps) {
           </nav>
         </div>
         
+        <div className="mb-7">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            Account
+          </h2>
+          <nav>
+            <ul className="space-y-1">
+              <li>
+                <Link href="/profile">
+                  <div className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-[4px] cursor-pointer",
+                    location === '/profile'
+                      ? "bg-[rgba(60,180,80,0.15)] text-[hsl(135,80%,45%)] border border-[rgba(60,180,80,0.3)]"
+                      : "text-gray-400 hover:bg-[#191919] hover:text-gray-200"
+                  )}>
+                    <User className="h-4 w-4 mr-3 text-gray-500" />
+                    <span>User Profile</span>
+                    {!isAuthenticated && <span className="ml-auto text-xs px-1.5 py-0.5 rounded bg-gray-800 text-gray-400">Login Required</span>}
+                  </div>
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        
         <div>
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             Configuration
