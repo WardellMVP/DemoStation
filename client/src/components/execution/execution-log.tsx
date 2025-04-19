@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useWebSocket, WebSocketStatus } from '@/hooks/use-websocket';
+import { useCallback, useEffect, useState } from 'react';
+import { WebSocketStatus } from '@/hooks/use-websocket';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -8,6 +8,7 @@ import { ConsoleOutput } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { useWebSocketContext } from '@/context/websocket-provider';
 
 type ExecutionStatusProps = {
   status: 'running' | 'completed' | 'failed';
@@ -55,38 +56,19 @@ export function ExecutionLog({ executionId, status: initialStatus, initialOutput
     return [];
   });
 
-  // Initialize WebSocket connection
-  const { status: wsStatus, data, wsSupported, socket, sendMessage } = useWebSocket('', {
-    onOpen: () => {
-      console.log('WebSocket connection established');
-      // Subscribe to execution updates
-      sendSubscribeMessage();
-    },
-    onMessage: (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        handleWebSocketMessage(data);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    }
-  });
+  // Use WebSocket context
+  const { status: wsStatus, connected, sendMessage, subscribe } = useWebSocketContext();
 
-  // Send subscription message through WebSocket
-  const sendSubscribeMessage = () => {
-    if (wsStatus === WebSocketStatus.OPEN) {
-      const subscribeMessage = {
-        type: 'subscribe',
-        executionId
-      };
-      
-      // Use the sendMessage helper from the hook
-      sendMessage(subscribeMessage);
+  // Subscribe to execution updates
+  useEffect(() => {
+    if (connected) {
+      console.log(`Subscribing to execution updates for ID ${executionId}`);
+      subscribe(executionId);
     }
-  };
+  }, [connected, executionId, subscribe]);
 
   // Handle incoming WebSocket messages
-  const handleWebSocketMessage = (data: any) => {
+  const handleWebSocketMessage = useCallback((data: any) => {
     if (data.type === 'execution_update' && data.executionId === executionId) {
       // Update execution status if included
       if (data.update && data.update.status) {
@@ -101,7 +83,7 @@ export function ExecutionLog({ executionId, status: initialStatus, initialOutput
       // Add new console output line
       addOutputLine(data.output, 'info', data.timestamp);
     }
-  };
+  }, [executionId]);
 
   // Helper to add a line to the console output
   const addOutputLine = (text: string, type: 'info' | 'warning' | 'error' | 'success', timestamp?: string) => {
@@ -124,8 +106,32 @@ export function ExecutionLog({ executionId, status: initialStatus, initialOutput
     }
   }, [consoleOutput]);
 
-  // Display message if WebSockets are not supported
-  if (!wsSupported) {
+  // Set up message listener for WebSocket events
+  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        handleWebSocketMessage(data);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    // Add event listener to the WebSocket global object
+    if (window.__wsConnection) {
+      window.__wsConnection.addEventListener('message', messageHandler);
+    }
+
+    // Clean up the event listener
+    return () => {
+      if (window.__wsConnection) {
+        window.__wsConnection.removeEventListener('message', messageHandler);
+      }
+    };
+  }, [executionId, handleWebSocketMessage]);
+  
+  // Display message if no connection is available
+  if (wsStatus === WebSocketStatus.ERROR || wsStatus === WebSocketStatus.CLOSED) {
     return (
       <Card className="bg-background-900 border-border">
         <CardHeader>

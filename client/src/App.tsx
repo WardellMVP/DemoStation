@@ -9,6 +9,7 @@ import Settings from "@/pages/settings";
 import Scenarios from "@/pages/scenarios";
 import { Layout } from "@/components/layout/layout";
 import { ThemeProvider } from "@/context/theme-provider";
+import { WebSocketProvider } from "@/context/websocket-provider";
 
 function Router() {
   return (
@@ -28,8 +29,10 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={queryClient}>
-        <Router />
-        <Toaster />
+        <WebSocketProvider>
+          <Router />
+          <Toaster />
+        </WebSocketProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );
