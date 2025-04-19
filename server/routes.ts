@@ -18,7 +18,7 @@ import {
 } from "@shared/schema";
 import * as yaml from 'js-yaml';
 import { z } from "zod";
-import { requireAuth } from "./auth";
+import { requireAuth, setupAuth } from "./auth";
 import { fromZodError } from "zod-validation-error";
 
 // GitLab API helper functions
