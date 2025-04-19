@@ -33,13 +33,13 @@ export function UserProfile() {
     return (
       <Card className="w-full max-w-md border border-gray-800 bg-black/50">
         <CardHeader>
-          <CardTitle className="text-green-500">Authentication Required</CardTitle>
+          <CardTitle className="text-blue-500">Authentication Required</CardTitle>
           <CardDescription>You need to sign in to access your profile.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-6">
-          <Shield className="h-16 w-16 text-green-500 mb-4" />
+          <Shield className="h-16 w-16 text-blue-500 mb-4" />
           <p className="text-center text-gray-400 mb-4">
-            Sign in with your Okta account to view your profile and access secure features.
+            Sign in to view your profile and access secure features.
           </p>
         </CardContent>
         <CardFooter>
@@ -60,14 +60,14 @@ export function UserProfile() {
   return (
     <Card className="w-full max-w-md border border-gray-800 bg-black/50">
       <CardHeader>
-        <CardTitle className="text-green-500">User Profile</CardTitle>
+        <CardTitle className="text-blue-500">User Profile</CardTitle>
         <CardDescription>Your personal account information</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-4">
-          <Avatar className="h-12 w-12 border-2 border-green-500">
+          <Avatar className="h-12 w-12 border-2 border-blue-500">
             <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'User'} />
-            <AvatarFallback className="bg-gray-900 text-green-500">
+            <AvatarFallback className="bg-gray-900 text-blue-500">
               <UserCircle className="h-6 w-6" />
             </AvatarFallback>
           </Avatar>

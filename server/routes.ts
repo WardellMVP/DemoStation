@@ -94,6 +94,8 @@ async function downloadProjectArchive(projectId: string, ref: string = "main"): 
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication routes
+  setupAuth(app);
   // GitLab configuration endpoints
   app.get('/api/gitlab/config', async (req: Request, res: Response) => {
     try {
