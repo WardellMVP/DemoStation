@@ -7,6 +7,13 @@ import { storage } from './storage';
 import { User, InsertUser } from '@shared/schema';
 import { pool } from './db';
 
+// Extend SessionData to include our custom properties
+declare module 'express-session' {
+  interface SessionData {
+    returnTo?: string;
+  }
+}
+
 // Extend Express types to include user
 declare global {
   namespace Express {
@@ -111,18 +118,51 @@ export const setupAuth = (app: express.Express) => {
     });
 
     // Auth routes
-    app.get('/login', passport.authenticate('okta'));
+    app.get('/login', (req, res, next) => {
+      // Store the original URL if it was passed in the redirect_to query parameter
+      if (req.query.redirect_to) {
+        req.session.returnTo = req.query.redirect_to as string;
+      }
+      passport.authenticate('okta')(req, res, next);
+    });
     
     app.get('/auth/okta/callback', 
       passport.authenticate('okta', { failureRedirect: '/login' }),
       (req, res) => {
-        res.redirect('/');
+        const returnTo = req.session.returnTo || '/';
+        delete req.session.returnTo;
+        
+        // Update the user's last login time
+        if (req.user) {
+          storage.updateUser((req.user as User).id, { 
+            lastLogin: new Date() 
+          }).catch(err => {
+            console.error('Failed to update last login time:', err);
+          });
+        }
+        
+        res.redirect(returnTo);
       }
     );
     
     app.get('/logout', (req, res) => {
-      req.logout(() => {
-        res.redirect('/');
+      const redirectUrl = req.query.redirect_to as string || '/';
+      
+      req.logout((err) => {
+        if (err) {
+          console.error('Error during logout:', err);
+          return res.redirect('/');
+        }
+        
+        // If Okta issuer is available, redirect to Okta logout
+        if (process.env.OKTA_ISSUER) {
+          const oktaLogoutUrl = `${process.env.OKTA_ISSUER}/v1/logout?id_token_hint=&post_logout_redirect_uri=${encodeURIComponent(
+            `${req.protocol}://${req.get('host')}${redirectUrl}`
+          )}`;
+          return res.redirect(oktaLogoutUrl);
+        }
+        
+        res.redirect(redirectUrl);
       });
     });
   } else {
@@ -132,7 +172,13 @@ export const setupAuth = (app: express.Express) => {
   // Middleware to check if user is authenticated
   app.get('/api/me', (req, res) => {
     if (req.isAuthenticated()) {
-      res.json(req.user);
+      // Convert Date objects to ISO strings for consistent handling in the frontend
+      const user = {
+        ...req.user,
+        lastLogin: req.user.lastLogin ? new Date(req.user.lastLogin).toISOString() : null,
+        createdAt: req.user.createdAt ? new Date(req.user.createdAt).toISOString() : null,
+      };
+      res.json(user);
     } else {
       res.status(401).json({ error: 'Not authenticated' });
     }

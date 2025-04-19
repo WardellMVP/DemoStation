@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Shield, LogOut, UserCircle } from 'lucide-react';
 
 export function UserProfile() {
-  const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
   if (isLoading) {
     return (
@@ -44,8 +44,11 @@ export function UserProfile() {
         </CardContent>
         <CardFooter>
           <Button 
-            className="w-full" 
-            onClick={() => window.location.href = '/login'}
+            className="w-full"
+            onClick={(e) => {
+              e.preventDefault();
+              login();
+            }}
           >
             Sign In
           </Button>
@@ -90,7 +93,10 @@ export function UserProfile() {
         <Button 
           variant="destructive" 
           className="w-full" 
-          onClick={logout}
+          onClick={(e) => {
+            e.preventDefault();
+            logout();
+          }}
         >
           <LogOut className="mr-2 h-4 w-4" /> Sign Out
         </Button>
